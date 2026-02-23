@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/task.dart';
 import '../utils/constants.dart';
 
-/// Reusable task card widget displayed in ListView.
+/// Tiimo‑style minimal task card.
 class TaskCard extends StatelessWidget {
   final Task task;
   final VoidCallback? onTap;
@@ -17,144 +18,165 @@ class TaskCard extends StatelessWidget {
     this.onDelete,
   });
 
+  /// Format "2026-03-01" → "Mar 1"
+  String _shortDate(String? raw) {
+    if (raw == null) return '';
+    try {
+      final d = DateTime.parse(raw);
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      return '${months[d.month - 1]} ${d.day}';
+    } catch (_) {
+      // Fallback: return first 10 chars at most
+      return raw.length > 10 ? raw.substring(0, 10) : raw;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final statusColor = AppConstants.statusColor(task.status);
-    final statusIcon = AppConstants.statusIcon(task.status);
+    final bgColor = AppConstants.statusBgColor(task.status);
+    final emoji = AppConstants.statusEmoji(task.status);
+    final isCompleted = task.status == 'completed';
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Status icon ──
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+        boxShadow: [
+          BoxShadow(
+            color: AppConstants.primaryColor.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // ── Emoji bubble ──
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: bgColor.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: Text(emoji, style: const TextStyle(fontSize: 22)),
+                  ),
                 ),
-                child: Icon(statusIcon, color: statusColor, size: 24),
-              ),
-              const SizedBox(width: 14),
-              // ── Text content ──
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task.title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        decoration: task.status == 'completed'
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      task.description,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        // Status badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            task.statusLabel,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                const SizedBox(width: 14),
+                // ── Title + meta ──
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppConstants.textPrimary,
+                          decoration: isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
+                          decorationColor: AppConstants.textSecondary,
                         ),
-                        const SizedBox(width: 8),
-                        // Due date
-                        if (task.dueDate != null) ...[
-                          Icon(
-                            Icons.calendar_today,
-                            size: 12,
-                            color: task.isOverdue
-                                ? AppConstants.errorColor
-                                : Colors.grey[500],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            task.dueDate!,
-                            style: theme.textTheme.labelSmall?.copyWith(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (task.dueDate != null) ...[
+                            Icon(
+                              Icons.schedule_rounded,
+                              size: 13,
                               color: task.isOverdue
                                   ? AppConstants.errorColor
-                                  : Colors.grey[500],
-                              fontWeight: task.isOverdue
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                                  : AppConstants.textSecondary,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              _shortDate(task.dueDate),
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: task.isOverdue
+                                    ? AppConstants.errorColor
+                                    : AppConstants.textSecondary,
+                                fontWeight: task.isOverdue
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                          ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: bgColor.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              task.statusLabel,
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppConstants.statusColor(task.status),
+                              ),
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              // ── Action buttons (IconButton) ──
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit_outlined,
-                      color: theme.colorScheme.primary,
-                      size: 20,
+                const SizedBox(width: 8),
+                // ── Circle checkbox ──
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isCompleted
+                        ? AppConstants.successColor
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: isCompleted
+                          ? AppConstants.successColor
+                          : AppConstants.textLight,
+                      width: 2,
                     ),
-                    tooltip: 'Edit',
-                    onPressed: onEdit,
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
-                    padding: EdgeInsets.zero,
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: theme.colorScheme.error,
-                      size: 20,
-                    ),
-                    tooltip: 'Delete',
-                    onPressed: onDelete,
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
-                    padding: EdgeInsets.zero,
-                  ),
-                ],
-              ),
-            ],
+                  child: isCompleted
+                      ? const Icon(Icons.check, color: Colors.white, size: 16)
+                      : null,
+                ),
+              ],
+            ),
           ),
         ),
       ),

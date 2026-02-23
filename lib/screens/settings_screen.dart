@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
 
-/// Settings Screen with toggles, dialogs, and various button types.
+/// Settings Screen — Tiimo‑style settings with soft cards, emoji icons,
+/// toggles, dialogs, and various button types.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -18,143 +20,225 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(
+        title: Text(
+          'Settings',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            color: AppConstants.textPrimary,
+          ),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         children: [
           // ── Appearance ──
-          _SectionHeader(title: 'Appearance'),
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  secondary: const Icon(Icons.dark_mode),
-                  title: const Text('Dark Mode'),
-                  subtitle: const Text('Use dark theme'),
-                  value: _darkMode,
-                  onChanged: (v) => setState(() => _darkMode = v),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.language),
-                  title: const Text('Language'),
-                  trailing: DropdownButton<String>(
-                    value: _language,
-                    underline: const SizedBox(),
-                    items: ['English', 'Khmer', 'French']
-                        .map((l) => DropdownMenuItem(value: l, child: Text(l)))
-                        .toList(),
-                    onChanged: (v) => setState(() => _language = v!),
+          const _SectionHeader(emoji: '🎨', title: 'APPEARANCE'),
+          _SettingsCard(
+            children: [
+              SwitchListTile(
+                secondary: const Text('🌙', style: TextStyle(fontSize: 22)),
+                title: Text(
+                  'Dark Mode',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    color: AppConstants.textPrimary,
                   ),
                 ),
-              ],
-            ),
+                subtitle: Text(
+                  'Use dark theme',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: AppConstants.textSecondary,
+                  ),
+                ),
+                value: _darkMode,
+                activeTrackColor: AppConstants.primaryColor,
+                onChanged: (v) => setState(() => _darkMode = v),
+              ),
+              Divider(
+                height: 1,
+                color: AppConstants.primaryLight.withValues(alpha: 0.2),
+              ),
+              ListTile(
+                leading: const Text('🌐', style: TextStyle(fontSize: 22)),
+                title: Text(
+                  'Language',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    color: AppConstants.textPrimary,
+                  ),
+                ),
+                trailing: DropdownButton<String>(
+                  value: _language,
+                  underline: const SizedBox(),
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: AppConstants.textPrimary,
+                  ),
+                  items: ['English', 'Khmer', 'French']
+                      .map((l) => DropdownMenuItem(value: l, child: Text(l)))
+                      .toList(),
+                  onChanged: (v) => setState(() => _language = v!),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
 
           // ── Notifications ──
-          _SectionHeader(title: 'Notifications'),
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  secondary: const Icon(Icons.notifications_active),
-                  title: const Text('Push Notifications'),
-                  value: _notifications,
-                  onChanged: (v) => setState(() => _notifications = v),
+          const _SectionHeader(emoji: '🔔', title: 'NOTIFICATIONS'),
+          _SettingsCard(
+            children: [
+              SwitchListTile(
+                secondary: const Text('📬', style: TextStyle(fontSize: 22)),
+                title: Text(
+                  'Push Notifications',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    color: AppConstants.textPrimary,
+                  ),
                 ),
-                const Divider(height: 1),
-                SwitchListTile(
-                  secondary: const Icon(Icons.fingerprint),
-                  title: const Text('Biometric Login'),
-                  value: _biometrics,
-                  onChanged: (v) => setState(() => _biometrics = v),
+                value: _notifications,
+                activeTrackColor: AppConstants.primaryColor,
+                onChanged: (v) => setState(() => _notifications = v),
+              ),
+              Divider(
+                height: 1,
+                color: AppConstants.primaryLight.withValues(alpha: 0.2),
+              ),
+              SwitchListTile(
+                secondary: const Text('🔒', style: TextStyle(fontSize: 22)),
+                title: Text(
+                  'Biometric Login',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    color: AppConstants.textPrimary,
+                  ),
                 ),
-              ],
-            ),
+                value: _biometrics,
+                activeTrackColor: AppConstants.primaryColor,
+                onChanged: (v) => setState(() => _biometrics = v),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
 
           // ── Account ──
-          _SectionHeader(title: 'Account'),
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.lock),
-                  title: const Text('Change Password'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Password change coming soon!'),
-                      ),
-                    );
-                  },
+          const _SectionHeader(emoji: '👤', title: 'ACCOUNT'),
+          _SettingsCard(
+            children: [
+              ListTile(
+                leading: const Text('🔑', style: TextStyle(fontSize: 22)),
+                title: Text(
+                  'Change Password',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    color: AppConstants.textPrimary,
+                  ),
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.privacy_tip),
-                  title: const Text('Privacy Policy'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // ── AlertDialog ──
-                    showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                trailing: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppConstants.textLight,
+                ),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Password change coming soon!',
+                        style: GoogleFonts.poppins(),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: AppConstants.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              Divider(
+                height: 1,
+                color: AppConstants.primaryLight.withValues(alpha: 0.2),
+              ),
+              ListTile(
+                leading: const Text('🛡️', style: TextStyle(fontSize: 22)),
+                title: Text(
+                  'Privacy Policy',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    color: AppConstants.textPrimary,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppConstants.textLight,
+                ),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.cardRadius,
                         ),
-                        title: const Text('Privacy Policy'),
-                        content: const Text(
-                          'Your privacy is important to us. TaskFlow does not '
-                          'collect personal data beyond what is needed for '
-                          'functionality. All data is transmitted securely.',
+                      ),
+                      title: Text(
+                        '🛡️  Privacy Policy',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w700,
+                          color: AppConstants.textPrimary,
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
+                      ),
+                      content: Text(
+                        'Your privacy is important to us. TaskFlow does not '
+                        'collect personal data beyond what is needed for '
+                        'functionality. All data is transmitted securely.',
+                        style: GoogleFonts.poppins(
+                          color: AppConstants.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'Close',
+                            style: GoogleFonts.poppins(
+                              color: AppConstants.primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 24),
 
           // ── Button showcase ──
-          _SectionHeader(title: 'Button Types Demo'),
+          const _SectionHeader(emoji: '🎛️', title: 'BUTTON TYPES DEMO'),
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: [
               ElevatedButton(
                 onPressed: () => _showSnack(context, 'ElevatedButton pressed'),
-                child: const Text('Elevated'),
+                child: Text('Elevated', style: GoogleFonts.poppins()),
               ),
               OutlinedButton(
                 onPressed: () => _showSnack(context, 'OutlinedButton pressed'),
-                child: const Text('Outlined'),
+                child: Text('Outlined', style: GoogleFonts.poppins()),
               ),
               TextButton(
                 onPressed: () => _showSnack(context, 'TextButton pressed'),
-                child: const Text('Text'),
+                child: Text('Text', style: GoogleFonts.poppins()),
               ),
               IconButton(
-                icon: const Icon(Icons.thumb_up),
+                icon: const Text('👍', style: TextStyle(fontSize: 22)),
                 onPressed: () => _showSnack(context, 'IconButton pressed'),
               ),
             ],
@@ -164,14 +248,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // ── Log Out (OutlinedButton) ──
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: 52,
             child: OutlinedButton.icon(
-              icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text('Log Out', style: TextStyle(color: Colors.red)),
+              icon: const Text('🚪', style: TextStyle(fontSize: 18)),
+              label: Text(
+                'Log Out',
+                style: GoogleFonts.poppins(
+                  color: const Color(0xFFFF6B6B),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.red),
+                side: const BorderSide(color: Color(0xFFFF6B6B)),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               onPressed: () {
@@ -179,33 +269,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   context: context,
                   builder: (_) => AlertDialog(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.cardRadius,
+                      ),
                     ),
-                    title: const Row(
-                      children: [
-                        Icon(Icons.logout, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Log Out'),
-                      ],
+                    title: Text(
+                      '🚪  Log Out',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w700,
+                        color: AppConstants.textPrimary,
+                      ),
                     ),
-                    content: const Text('Are you sure you want to log out?'),
+                    content: Text(
+                      'Are you sure you want to log out?',
+                      style: GoogleFonts.poppins(
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
+                        child: Text(
+                          'Cancel',
+                          style: GoogleFonts.poppins(
+                            color: AppConstants.textSecondary,
+                          ),
+                        ),
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: const Color(0xFFFF6B6B),
                           foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         onPressed: () {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Logged out (demo)')),
+                            SnackBar(
+                              content: Text(
+                                'Logged out (demo)',
+                                style: GoogleFonts.poppins(),
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppConstants.primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
                           );
                         },
-                        child: const Text('Log Out'),
+                        child: Text(
+                          'Log Out',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -220,24 +340,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showSnack(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg, style: GoogleFonts.poppins()),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppConstants.primaryColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 }
 
+// ── Soft rounded card wrapper ──
+class _SettingsCard extends StatelessWidget {
+  final List<Widget> children;
+  const _SettingsCard({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+        boxShadow: [
+          BoxShadow(
+            color: AppConstants.primaryColor.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+        child: Column(children: children),
+      ),
+    );
+  }
+}
+
+// ── Section header with emoji ──
 class _SectionHeader extends StatelessWidget {
+  final String emoji;
   final String title;
-  const _SectionHeader({required this.title});
+  const _SectionHeader({required this.emoji, required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: Colors.grey[700],
-        ),
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: 6),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+              color: AppConstants.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }

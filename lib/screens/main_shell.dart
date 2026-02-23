@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
 import 'home_screen.dart';
 import 'task_list_screen.dart';
 import 'profile_screen.dart';
 
-/// Main shell that hosts BottomNavigationBar with 3 tabs.
+/// Main shell with Tiimo‑style bottom navigation.
 class MainShell extends StatefulWidget {
   final int initialIndex;
 
@@ -32,27 +33,39 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
-      // ── BottomNavigationBar with 3 tabs ──
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (i) => setState(() => _currentIndex = i),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.task_outlined),
-            selectedIcon: Icon(Icons.task_alt_rounded),
-            label: 'Tasks',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: AppConstants.primaryColor.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (i) => setState(() => _currentIndex = i),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.wb_sunny_outlined),
+              selectedIcon: Icon(Icons.wb_sunny_rounded),
+              label: 'Today',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.checklist_rounded),
+              selectedIcon: Icon(Icons.checklist_rounded),
+              label: 'Tasks',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline_rounded),
+              selectedIcon: Icon(Icons.person_rounded),
+              label: 'Me',
+            ),
+          ],
+        ),
       ),
     );
   }

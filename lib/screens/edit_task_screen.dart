@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/task.dart';
 import '../services/task_provider.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/app_dialogs.dart';
+import '../utils/constants.dart';
 import '../utils/validators.dart';
 
-/// Edit Task Screen — form to update an existing task (PUT to API).
+/// Edit Task Screen — Tiimo‑style form to update a task (PUT to API).
 class EditTaskScreen extends StatefulWidget {
   final Task task;
 
@@ -56,6 +58,16 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       initialDate: _dueDate ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: AppConstants.primaryColor),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() => _dueDate = picked);
@@ -99,11 +111,16 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Task'),
+        title: Text(
+          'Edit Task',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            color: AppConstants.textPrimary,
+          ),
+        ),
         actions: [
-          // ── Delete IconButton in AppBar ──
           IconButton(
-            icon: const Icon(Icons.delete_forever, color: Colors.red),
+            icon: const Icon(Icons.delete_rounded, color: Color(0xFFFF6B6B)),
             tooltip: 'Delete Task',
             onPressed: () async {
               final nav = Navigator.of(context);
@@ -118,9 +135,13 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
               await provider.deleteTask(widget.task.id!);
               if (!mounted) return;
               messenger.showSnackBar(
-                const SnackBar(
-                  content: Text('Task deleted.'),
-                  backgroundColor: Colors.green,
+                SnackBar(
+                  content: const Text('Task deleted.'),
+                  backgroundColor: AppConstants.successColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               );
               nav.pop();
@@ -129,18 +150,39 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // ── Emoji header ──
+              Center(
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: AppConstants.statusBgColor(
+                      _status,
+                    ).withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Center(
+                    child: Text(
+                      AppConstants.statusEmoji(_status),
+                      style: const TextStyle(fontSize: 30),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
               // ── Task Title ──
               CustomTextField(
                 controller: _titleCtrl,
                 label: 'Task Title',
                 hint: 'Enter task title',
-                prefixIcon: Icons.title,
+                prefixIcon: Icons.title_rounded,
                 validator: Validators.minLength3,
               ),
 
@@ -149,7 +191,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 controller: _descCtrl,
                 label: 'Description',
                 hint: 'Enter task description',
-                prefixIcon: Icons.description,
+                prefixIcon: Icons.description_rounded,
                 maxLines: 3,
                 validator: Validators.required,
               ),
@@ -159,23 +201,44 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: InkWell(
                   onTap: _pickDate,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   child: InputDecorator(
                     decoration: InputDecoration(
                       labelText: 'Due Date',
-                      prefixIcon: const Icon(Icons.calendar_today),
+                      labelStyle: GoogleFonts.poppins(
+                        color: AppConstants.textSecondary,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.calendar_today_rounded,
+                        color: AppConstants.primaryColor,
+                      ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: AppConstants.primaryLight.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color: AppConstants.primaryLight.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
                       ),
                       filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
+                      fillColor: AppConstants.backgroundColor,
                     ),
                     child: Text(
                       _dueDate != null
                           ? '${_dueDate!.year}-${_dueDate!.month.toString().padLeft(2, '0')}-${_dueDate!.day.toString().padLeft(2, '0')}'
                           : 'Select due date',
-                      style: TextStyle(
-                        color: _dueDate != null ? null : Colors.grey[600],
+                      style: GoogleFonts.poppins(
+                        color: _dueDate != null
+                            ? AppConstants.textPrimary
+                            : AppConstants.textLight,
                       ),
                     ),
                   ),
@@ -184,17 +247,36 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
 
               // ── Status dropdown ──
               Padding(
-                padding: const EdgeInsets.only(bottom: 24),
+                padding: const EdgeInsets.only(bottom: 28),
                 child: DropdownButtonFormField<String>(
                   initialValue: _status,
+                  style: GoogleFonts.poppins(
+                    color: AppConstants.textPrimary,
+                    fontSize: 14,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'Status',
-                    prefixIcon: const Icon(Icons.flag),
+                    labelStyle: GoogleFonts.poppins(
+                      color: AppConstants.textSecondary,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.flag_rounded,
+                      color: AppConstants.primaryColor,
+                    ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: AppConstants.primaryLight.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: AppConstants.primaryLight.withValues(alpha: 0.3),
+                      ),
                     ),
                     filled: true,
-                    fillColor: Theme.of(context).colorScheme.surface,
+                    fillColor: AppConstants.backgroundColor,
                   ),
                   items: _statuses.entries.map((e) {
                     return DropdownMenuItem(value: e.key, child: Text(e.value));
@@ -203,7 +285,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 ),
               ),
 
-              // ── Save Button (ElevatedButton) ──
+              // ── Save ──
               SizedBox(
                 height: 52,
                 child: ElevatedButton.icon(
@@ -216,14 +298,12 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Icon(Icons.save),
+                      : const Icon(Icons.save_rounded),
                   label: Text(
                     _isSaving ? 'Saving…' : 'Update Task',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
                     ),
                   ),
                   onPressed: _isSaving ? null : _submit,
@@ -231,12 +311,17 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ── Cancel Button (TextButton) ──
+              // ── Cancel ──
               SizedBox(
                 height: 48,
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.poppins(
+                      color: AppConstants.textSecondary,
+                    ),
+                  ),
                 ),
               ),
             ],

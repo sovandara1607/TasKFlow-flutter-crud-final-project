@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
 import '../utils/validators.dart';
 import '../widgets/custom_text_field.dart';
 
-/// Profile Screen — displays user info with editable form and various widgets.
+/// Tiimo‑style Profile Screen — soft gradient header, clean form.
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -28,15 +29,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(
+          'Profile',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            color: AppConstants.textPrimary,
+          ),
+        ),
         actions: [
-          // ── IconButton to toggle edit mode ──
           IconButton(
-            icon: Icon(_isEditing ? Icons.close : Icons.edit),
+            icon: Icon(
+              _isEditing ? Icons.close_rounded : Icons.edit_rounded,
+              color: AppConstants.primaryColor,
+            ),
             tooltip: _isEditing ? 'Cancel' : 'Edit Profile',
             onPressed: () => setState(() => _isEditing = !_isEditing),
           ),
@@ -46,36 +53,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Column(
           children: [
-            // ── Avatar with Network Image ──
+            // ── Avatar with gradient circle ──
             Center(
               child: Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 56,
-                    backgroundColor: AppConstants.primaryColor.withValues(
-                      alpha: 0.1,
+                  Container(
+                    width: 116,
+                    height: 116,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppConstants.primaryLight,
+                          AppConstants.accentPink,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppConstants.primaryColor.withValues(
+                            alpha: 0.2,
+                          ),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                    child: const CircleAvatar(
-                      radius: 52,
-                      backgroundImage: NetworkImage(
-                        'https://i.pravatar.cc/150?img=12',
+                    child: const Padding(
+                      padding: EdgeInsets.all(3),
+                      child: CircleAvatar(
+                        radius: 54,
+                        backgroundImage: NetworkImage(
+                          'https://i.pravatar.cc/150?img=12',
+                        ),
                       ),
                     ),
                   ),
                   Positioned(
-                    bottom: 0,
-                    right: 0,
+                    bottom: 2,
+                    right: 2,
                     child: Container(
                       decoration: BoxDecoration(
                         color: AppConstants.primaryColor,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                        border: Border.all(color: Colors.white, width: 3),
                       ),
                       child: IconButton(
                         icon: const Icon(
-                          Icons.camera_alt,
+                          Icons.camera_alt_rounded,
                           color: Colors.white,
-                          size: 18,
+                          size: 16,
                         ),
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -85,8 +113,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         },
                         constraints: const BoxConstraints(
-                          minWidth: 36,
-                          minHeight: 36,
+                          minWidth: 34,
+                          minHeight: 34,
                         ),
                         padding: EdgeInsets.zero,
                       ),
@@ -98,19 +126,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
             Text(
               'Dara Student',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: AppConstants.textPrimary,
               ),
             ),
+            const SizedBox(height: 2),
             Text(
               'Computer Science — Year 4',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: AppConstants.textSecondary,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
-            // ── Profile Form with validation ──
+            // ── Form ──
             Form(
               key: _formKey,
               child: Column(
@@ -118,20 +150,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   CustomTextField(
                     controller: _nameCtrl,
                     label: 'Full Name',
-                    prefixIcon: Icons.person,
+                    prefixIcon: Icons.person_rounded,
                     validator: Validators.required,
                   ),
                   CustomTextField(
                     controller: _emailCtrl,
                     label: 'Email',
-                    prefixIcon: Icons.email,
+                    prefixIcon: Icons.email_rounded,
                     keyboardType: TextInputType.emailAddress,
                     validator: Validators.email,
                   ),
                   CustomTextField(
                     controller: _phoneCtrl,
                     label: 'Phone',
-                    prefixIcon: Icons.phone,
+                    prefixIcon: Icons.phone_rounded,
                     keyboardType: TextInputType.phone,
                     validator: Validators.required,
                   ),
@@ -141,20 +173,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
 
             if (_isEditing) ...[
-              // ── Save (ElevatedButton) ──
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 50,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.save),
+                  icon: const Icon(Icons.save_rounded),
                   label: const Text('Save Changes'),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       setState(() => _isEditing = false);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Profile updated successfully!'),
-                          backgroundColor: Colors.green,
+                        SnackBar(
+                          content: const Text('Profile updated successfully!'),
+                          backgroundColor: AppConstants.successColor,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       );
                     }
@@ -162,25 +197,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              // ── Discard (TextButton) ──
               TextButton(
                 onPressed: () => setState(() => _isEditing = false),
-                child: const Text('Discard Changes'),
+                child: Text(
+                  'Discard Changes',
+                  style: GoogleFonts.poppins(color: AppConstants.textSecondary),
+                ),
               ),
             ] else ...[
-              // ── Info cards ──
-              _InfoTile(
-                icon: Icons.school,
+              _InfoCard(
+                emoji: '🏫',
                 title: 'University',
                 subtitle: 'Royal University of Phnom Penh',
               ),
-              _InfoTile(
-                icon: Icons.book,
+              _InfoCard(
+                emoji: '📱',
                 title: 'Course',
                 subtitle: 'CS361 — Mobile App Development',
               ),
-              _InfoTile(
-                icon: Icons.calendar_today,
+              _InfoCard(
+                emoji: '📅',
                 title: 'Semester',
                 subtitle: 'Spring 2026',
               ),
@@ -192,29 +228,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-class _InfoTile extends StatelessWidget {
-  final IconData icon;
+class _InfoCard extends StatelessWidget {
+  final String emoji;
   final String title;
   final String subtitle;
 
-  const _InfoTile({
-    required this.icon,
+  const _InfoCard({
+    required this.emoji,
     required this.title,
     required this.subtitle,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppConstants.primaryColor.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppConstants.primaryColor.withValues(alpha: 0.1),
-          child: Icon(icon, color: AppConstants.primaryColor),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        leading: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: AppConstants.accentLavender.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(emoji, style: const TextStyle(fontSize: 20)),
+          ),
         ),
-        title: Text(title),
-        subtitle: Text(subtitle),
+        title: Text(
+          title,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: AppConstants.textPrimary,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: AppConstants.textSecondary,
+          ),
+        ),
       ),
     );
   }

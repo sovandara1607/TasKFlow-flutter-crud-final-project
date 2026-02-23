@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/task.dart';
 import '../services/task_provider.dart';
@@ -6,7 +7,7 @@ import '../widgets/task_card.dart';
 import '../widgets/app_dialogs.dart';
 import '../utils/constants.dart';
 
-/// Task List Screen — displays all tasks using ListView.builder with CRUD actions.
+/// Tiimo‑style Task List Screen — filter chips, clean list with Explore feel.
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
 
@@ -15,6 +16,10 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
+  String _filter = 'all';
+  final _searchCtrl = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +29,30 @@ class _TaskListScreenState extends State<TaskListScreen> {
         provider.fetchTasks();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<Task> _applyFilter(List<Task> tasks) {
+    var result = tasks;
+    if (_filter != 'all') {
+      result = result.where((t) => t.status == _filter).toList();
+    }
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      result = result
+          .where(
+            (t) =>
+                t.title.toLowerCase().contains(q) ||
+                t.description.toLowerCase().contains(q),
+          )
+          .toList();
+    }
+    return result;
   }
 
   Future<void> _deleteTask(Task task) async {
@@ -50,8 +79,32 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
   }
 
+  /// Format "2026-03-01" → "Mar 1"
+  String _shortDate(String? raw) {
+    if (raw == null) return '';
+    try {
+      final d = DateTime.parse(raw);
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      return '${months[d.month - 1]} ${d.day}';
+    } catch (_) {
+      return raw.length > 10 ? raw.substring(0, 10) : raw;
+    }
+  }
+
   void _showTaskDetails(Task task) {
-    // ── Modal Bottom Sheet showing task details ──
     AppDialogs.showBottomSheet(
       context: context,
       child: Column(
@@ -63,71 +116,99 @@ class _TaskListScreenState extends State<TaskListScreen> {
             child: Container(
               width: 40,
               height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppConstants.textLight,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-          // Status icon large
+          // Emoji header
           Center(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
-                color: AppConstants.statusColor(
+                color: AppConstants.statusBgColor(
                   task.status,
-                ).withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+                ).withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(18),
               ),
-              child: Icon(
-                AppConstants.statusIcon(task.status),
-                size: 40,
-                color: AppConstants.statusColor(task.status),
+              child: Center(
+                child: Text(
+                  AppConstants.statusEmoji(task.status),
+                  style: const TextStyle(fontSize: 30),
+                ),
               ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             task.title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppConstants.textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Chip(
-                avatar: Icon(
-                  AppConstants.statusIcon(task.status),
-                  size: 16,
-                  color: AppConstants.statusColor(task.status),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
                 ),
-                label: Text(task.statusLabel),
+                decoration: BoxDecoration(
+                  color: AppConstants.statusBgColor(
+                    task.status,
+                  ).withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  task.statusLabel,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppConstants.statusColor(task.status),
+                  ),
+                ),
               ),
               const Spacer(),
               if (task.dueDate != null) ...[
-                Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
+                Icon(
+                  Icons.schedule_rounded,
+                  size: 14,
+                  color: AppConstants.textSecondary,
+                ),
                 const SizedBox(width: 4),
-                Text(task.dueDate!, style: TextStyle(color: Colors.grey[600])),
+                Text(
+                  _shortDate(task.dueDate),
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: AppConstants.textSecondary,
+                  ),
+                ),
               ],
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
             task.description.isNotEmpty
                 ? task.description
                 : 'No description provided.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: AppConstants.textSecondary,
+              height: 1.5,
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(Icons.edit_rounded, size: 18),
                   label: const Text('Edit'),
                   onPressed: () {
                     Navigator.pop(context);
@@ -138,10 +219,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.delete),
+                  icon: const Icon(Icons.delete_rounded, size: 18),
                   label: const Text('Delete'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error,
+                    backgroundColor: AppConstants.errorColor,
                     foregroundColor: Colors.white,
                   ),
                   onPressed: () {
@@ -162,103 +243,275 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Tasks'),
+        title: Text(
+          'My Tasks',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            color: AppConstants.textPrimary,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Refresh',
             onPressed: () => context.read<TaskProvider>().fetchTasks(),
           ),
         ],
       ),
-      body: Consumer<TaskProvider>(
-        builder: (context, provider, _) {
-          // ── Loading state ──
-          if (provider.isLoading && provider.tasks.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          // ── Error state ──
-          if (provider.error != null && provider.tasks.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Could not load tasks',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      provider.error!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
-                      onPressed: () => provider.fetchTasks(),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          // ── Empty state ──
-          if (provider.tasks.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.inbox_rounded, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No tasks yet',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('Create Your First Task'),
-                    onPressed: () => Navigator.pushNamed(context, '/add'),
+      body: Column(
+        children: [
+          // ── Search bar ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppConstants.primaryColor.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-            );
-          }
+              child: TextField(
+                controller: _searchCtrl,
+                onChanged: (v) => setState(() => _searchQuery = v),
+                style: GoogleFonts.poppins(fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Search tasks…',
+                  hintStyle: GoogleFonts.poppins(
+                    color: AppConstants.textLight,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: AppConstants.textSecondary,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ),
 
-          // ── Task list using ListView.builder ──
-          return RefreshIndicator(
-            onRefresh: () => provider.fetchTasks(),
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: provider.tasks.length,
-              itemBuilder: (context, index) {
-                final task = provider.tasks[index];
-                return TaskCard(
-                  task: task,
-                  onTap: () => _showTaskDetails(task),
-                  onEdit: () =>
-                      Navigator.pushNamed(context, '/edit', arguments: task),
-                  onDelete: () => _deleteTask(task),
+          // ── Filter chips ──
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label: 'All',
+                    emoji: '📝',
+                    selected: _filter == 'all',
+                    onTap: () => setState(() => _filter = 'all'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Pending',
+                    emoji: '📋',
+                    selected: _filter == 'pending',
+                    onTap: () => setState(() => _filter = 'pending'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'In Progress',
+                    emoji: '⏳',
+                    selected: _filter == 'in_progress',
+                    onTap: () => setState(() => _filter = 'in_progress'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Completed',
+                    emoji: '✅',
+                    selected: _filter == 'completed',
+                    onTap: () => setState(() => _filter = 'completed'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // ── Task list ──
+          Expanded(
+            child: Consumer<TaskProvider>(
+              builder: (context, provider, _) {
+                if (provider.isLoading && provider.tasks.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (provider.error != null && provider.tasks.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('☁️', style: TextStyle(fontSize: 48)),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Could not load tasks',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppConstants.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            provider.error!,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: AppConstants.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: const Text('Retry'),
+                            onPressed: () => provider.fetchTasks(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                final filtered = _applyFilter(provider.tasks);
+
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('🔍', style: TextStyle(fontSize: 48)),
+                        const SizedBox(height: 16),
+                        Text(
+                          provider.tasks.isEmpty
+                              ? 'No tasks yet'
+                              : 'No matching tasks',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppConstants.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        if (provider.tasks.isEmpty)
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.add_rounded),
+                            label: const Text('Create Your First Task'),
+                            onPressed: () =>
+                                Navigator.pushNamed(context, '/add'),
+                          ),
+                      ],
+                    ),
+                  );
+                }
+
+                return RefreshIndicator(
+                  color: AppConstants.primaryColor,
+                  onRefresh: () => provider.fetchTasks(),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(top: 4, bottom: 80),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final task = filtered[index];
+                      return TaskCard(
+                        task: task,
+                        onTap: () => _showTaskDetails(task),
+                        onEdit: () => Navigator.pushNamed(
+                          context,
+                          '/edit',
+                          arguments: task,
+                        ),
+                        onDelete: () => _deleteTask(task),
+                      );
+                    },
+                  ),
                 );
               },
             ),
-          );
-        },
+          ),
+        ],
       ),
-      // ── FloatingActionButton ──
+      // ── FAB ──
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'add_task_fab',
-        icon: const Icon(Icons.add),
-        label: const Text('New Task'),
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          'New Task',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
         onPressed: () => Navigator.pushNamed(context, '/add'),
+      ),
+    );
+  }
+}
+
+// ── Custom filter chip ──
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final String emoji;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.emoji,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppConstants.primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppConstants.primaryColor.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 14)),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: selected ? Colors.white : AppConstants.textPrimary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
