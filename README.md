@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✅ TaskFlow
+# TaskFlow
 
 ### A Full-Stack Task Management Application
 
@@ -18,7 +18,7 @@
 ---
 
 **CS361 — Mobile Application Development • Final Project**
-**Royal University of Phnom Penh • Spring 2026**
+**ParagonU International University • Phnom Penh**
 
 </div>
 
