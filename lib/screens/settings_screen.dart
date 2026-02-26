@@ -137,30 +137,6 @@ class SettingsScreen extends StatelessWidget {
                     ? Colors.white12
                     : AppConstants.primaryLight.withValues(alpha: 0.2),
               ),
-              SwitchListTile(
-                secondary: Icon(
-                  Icons.fingerprint_rounded,
-                  color: isDark ? Colors.white70 : AppConstants.textSecondary,
-                ),
-                title: Text(
-                  AppLocalizations.tr('biometric_login', lang),
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white : AppConstants.textPrimary,
-                  ),
-                ),
-                subtitle: Text(
-                  AppLocalizations.tr('biometric_desc', lang),
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: isDark ? Colors.white54 : AppConstants.textSecondary,
-                  ),
-                ),
-                value: settings.biometricsEnabled,
-                activeTrackColor: AppConstants.primaryColor,
-                onChanged: (_) =>
-                    settings.setBiometrics(!settings.biometricsEnabled),
-              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -177,44 +153,6 @@ class SettingsScreen extends StatelessWidget {
               ListTile(
                 leading: Icon(
                   Icons.key_rounded,
-                  color: isDark ? Colors.white70 : AppConstants.textSecondary,
-                ),
-                title: Text(
-                  AppLocalizations.tr('change_password', lang),
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white : AppConstants.textPrimary,
-                  ),
-                ),
-                trailing: Icon(
-                  Icons.chevron_right_rounded,
-                  color: isDark ? Colors.white24 : AppConstants.textLight,
-                ),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Password change coming soon!',
-                        style: GoogleFonts.poppins(),
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                      backgroundColor: AppConstants.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              Divider(
-                height: 1,
-                color: isDark
-                    ? Colors.white12
-                    : AppConstants.primaryLight.withValues(alpha: 0.2),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.shield_outlined,
                   color: isDark ? Colors.white70 : AppConstants.textSecondary,
                 ),
                 title: Text(
@@ -293,13 +231,13 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'CS361 — Mobile App Development',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: isDark ? Colors.white38 : AppConstants.textLight,
-                  ),
-                ),
+                // Text(
+                //   'CS361 — Mobile App Development',
+                //   style: GoogleFonts.poppins(
+                //     fontSize: 12,
+                //     color: isDark ? Colors.white38 : AppConstants.textLight,
+                //   ),
+                // ),
               ],
             ),
           ),

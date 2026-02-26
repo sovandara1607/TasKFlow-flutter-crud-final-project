@@ -112,154 +112,249 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   void _showTaskDetails(Task task) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Track current status locally so the sheet updates in place
+    String currentStatus = task.status;
+
     AppDialogs.showBottomSheet(
       context: context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: AppConstants.textLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Center(
-            child: Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: AppConstants.statusBgColor(
-                  task.status,
-                ).withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Center(
-                child: Icon(
-                  AppConstants.statusIcon(task.status),
-                  size: 30,
-                  color: AppConstants.statusColor(task.status),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            task.title,
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : AppConstants.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
+      child: StatefulBuilder(
+        builder: (sheetContext, setSheetState) {
+          final displayTask = task.copyWith(status: currentStatus);
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppConstants.statusBgColor(
-                    task.status,
-                  ).withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  task.statusLabel,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppConstants.statusColor(task.status),
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: AppConstants.textLight,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppConstants.categoryColor(
-                    task.category,
-                  ).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${AppConstants.categoryLabel(task.category)}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppConstants.categoryColor(task.category),
+              Center(
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: AppConstants.statusBgColor(currentStatus),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      AppConstants.statusIcon(currentStatus),
+                      size: 30,
+                      color: AppConstants.statusColor(currentStatus),
+                    ),
                   ),
                 ),
               ),
-              const Spacer(),
-              if (task.dueDate != null) ...[
-                Icon(
-                  Icons.schedule_rounded,
-                  size: 14,
-                  color: AppConstants.textSecondary,
+              const SizedBox(height: 16),
+              Text(
+                task.title,
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : AppConstants.textPrimary,
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  _shortDate(task.dueDate),
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: AppConstants.textSecondary,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  // ── Tappable status badge ──
+                  GestureDetector(
+                    onTapDown: (details) async {
+                      final selected = await _showStatusPopup(
+                        sheetContext,
+                        details.globalPosition,
+                        currentStatus,
+                      );
+                      if (selected != null && selected != currentStatus) {
+                        setSheetState(() => currentStatus = selected);
+                        context.read<TaskProvider>().quickUpdateStatus(
+                          task,
+                          selected,
+                        );
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppConstants.statusBgColor(currentStatus),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            displayTask.statusLabel,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppConstants.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Icon(
+                            Icons.arrow_drop_down_rounded,
+                            size: 16,
+                            color: AppConstants.textPrimary,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppConstants.categoryColor(task.category),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${AppConstants.categoryLabel(task.category)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppConstants.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  if (task.dueDate != null) ...[
+                    Icon(
+                      Icons.schedule_rounded,
+                      size: 14,
+                      color: AppConstants.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _shortDate(task.dueDate),
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: AppConstants.textSecondary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                task.description.isNotEmpty
+                    ? task.description
+                    : 'No description provided.',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: isDark ? Colors.white54 : AppConstants.textSecondary,
+                  height: 1.5,
                 ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.edit_rounded, size: 18),
+                      label: const Text('Edit'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/edit', arguments: task);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.delete_rounded, size: 18),
+                      label: const Text('Delete'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppConstants.errorColor,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _deleteTask(task);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<String?> _showStatusPopup(
+    BuildContext context,
+    Offset position,
+    String currentStatus,
+  ) async {
+    final statuses = [
+      (
+        'pending',
+        'Pending',
+        Icons.radio_button_unchecked,
+        AppConstants.primaryColor,
+      ),
+      (
+        'in_progress',
+        'In Progress',
+        Icons.timelapse_rounded,
+        AppConstants.warningColor,
+      ),
+      (
+        'completed',
+        'Completed',
+        Icons.check_circle_rounded,
+        AppConstants.successColor,
+      ),
+    ];
+
+    return showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx + 1,
+        position.dy + 1,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      items: statuses.map((s) {
+        final isActive = currentStatus == s.$1;
+        return PopupMenuItem<String>(
+          value: s.$1,
+          child: Row(
+            children: [
+              Icon(s.$3, size: 18, color: s.$4),
+              const SizedBox(width: 10),
+              Text(
+                s.$2,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  color: isActive ? s.$4 : null,
+                ),
+              ),
+              if (isActive) ...[
+                const Spacer(),
+                Icon(Icons.check_rounded, size: 16, color: s.$4),
               ],
             ],
           ),
-          const SizedBox(height: 14),
-          Text(
-            task.description.isNotEmpty
-                ? task.description
-                : 'No description provided.',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: isDark ? Colors.white54 : AppConstants.textSecondary,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.edit_rounded, size: 18),
-                  label: const Text('Edit'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/edit', arguments: task);
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.delete_rounded, size: 18),
-                  label: const Text('Delete'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.errorColor,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _deleteTask(task);
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
+        );
+      }).toList(),
     );
   }
 
@@ -482,7 +577,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         Text(
                           provider.tasks.isEmpty
                               ? AppLocalizations.tr('no_tasks_yet', lang)
-                              : AppLocalizations.tr('no_matching', lang),
+                              : AppLocalizations.tr('no tasks match', lang),
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -491,16 +586,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                 : AppConstants.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        if (provider.tasks.isEmpty)
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.add_rounded),
-                            label: Text(
-                              AppLocalizations.tr('create_first', lang),
-                            ),
-                            onPressed: () =>
-                                Navigator.pushNamed(context, '/add'),
-                          ),
+                        // const SizedBox(height: 8),
+                        // if (provider.tasks.isEmpty)
+                        //   ElevatedButton.icon(
+                        //     icon: const Icon(Icons.add_rounded),
+                        //     label: Text(
+                        //       AppLocalizations.tr('create_first', lang),
+                        //     ),
+                        //     onPressed: () =>
+                        //         Navigator.pushNamed(context, '/add'),
+                        //   ),
                       ],
                     ),
                   );
@@ -563,6 +658,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             arguments: task,
                           ),
                           onDelete: () => _deleteTask(task),
+                          onStatusChange: (newStatus) {
+                            provider.quickUpdateStatus(task, newStatus);
+                          },
                         ),
                       );
                     },

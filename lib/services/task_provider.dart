@@ -76,6 +76,12 @@ class TaskProvider extends ChangeNotifier {
     return updateTask(updated);
   }
 
+  // ── QUICK STATUS CHANGE ──
+  Future<bool> quickUpdateStatus(Task task, String newStatus) async {
+    final updated = task.copyWith(status: newStatus);
+    return updateTask(updated);
+  }
+
   // ── DELETE ──
   Future<bool> deleteTask(int id) async {
     try {

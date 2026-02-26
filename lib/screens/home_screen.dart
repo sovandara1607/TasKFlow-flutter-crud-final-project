@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/task.dart';
 import '../services/task_provider.dart';
 import '../services/app_settings_provider.dart';
+import '../services/auth_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/constants.dart';
 import '../widgets/app_drawer.dart';
@@ -66,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final monthName = _months[now.month - 1];
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final settings = context.watch<AppSettingsProvider>();
+    final auth = context.watch<AuthProvider>();
     final lang = settings.locale;
 
     return Scaffold(
@@ -133,72 +135,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
 
-              // ── Greeting card ──
+              // ── Greeting card (animated by time of day) ──
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF9B8EC5), Color(0xFFB8ACE6)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.cardRadius,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppConstants.primaryColor.withValues(
-                          alpha: 0.25,
-                        ),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${_greeting(lang)}, ${settings.userName.split(' ').first}!',
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        AppLocalizations.tr('whats_your_plan', lang),
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.white70,
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-                      SizedBox(
-                        height: 42,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.add_rounded, size: 20),
-                          label: Text(
-                            AppLocalizations.tr('new_task', lang),
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: AppConstants.primaryColor,
-                            elevation: 0,
-                            shape: const StadiumBorder(),
-                          ),
-                          onPressed: () => Navigator.pushNamed(context, '/add'),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _GreetingCard(
+                  greeting: _greeting(lang),
+                  userName: (auth.userName ?? settings.userName)
+                      .split(' ')
+                      .first,
+                  subtitle: AppLocalizations.tr('whats_your_plan', lang),
+                  buttonLabel: AppLocalizations.tr('new_task', lang),
+                  onNewTask: () => Navigator.pushNamed(context, '/add'),
                 ),
               ),
               const SizedBox(height: 24),
@@ -396,39 +343,40 @@ class _StatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: isDark
-              ? color.withValues(alpha: 0.15)
-              : color.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 22,
-              color: isDark ? Colors.white70 : AppConstants.textPrimary,
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
             ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : AppConstants.textPrimary,
+            child: Center(
+              child: Icon(
+                icon,
+                size: 28,
+                color: isDark ? Colors.white70 : AppConstants.textPrimary,
               ),
             ),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                color: isDark ? Colors.white54 : AppConstants.textSecondary,
-              ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : AppConstants.textPrimary,
             ),
-          ],
-        ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              color: isDark ? Colors.white54 : AppConstants.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -660,7 +608,7 @@ class _MiniTaskTile extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: bgColor.withValues(alpha: 0.45),
+                      color: bgColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -705,26 +653,33 @@ class _MiniTaskTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isCompleted
-                          ? AppConstants.successColor
-                          : Colors.transparent,
-                      border: Border.all(
+                  GestureDetector(
+                    onTap: () => provider.toggleTaskStatus(task),
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
                         color: isCompleted
                             ? AppConstants.successColor
-                            : (isDark
-                                  ? Colors.white24
-                                  : AppConstants.textLight),
-                        width: 2,
+                            : Colors.transparent,
+                        border: Border.all(
+                          color: isCompleted
+                              ? AppConstants.successColor
+                              : (isDark
+                                    ? Colors.white24
+                                    : AppConstants.textLight),
+                          width: 2,
+                        ),
                       ),
+                      child: isCompleted
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 14,
+                            )
+                          : null,
                     ),
-                    child: isCompleted
-                        ? const Icon(Icons.check, color: Colors.white, size: 14)
-                        : null,
                   ),
                 ],
               ),
@@ -732,6 +687,197 @@ class _MiniTaskTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ── Animated greeting card based on time of day ──
+class _GreetingCard extends StatefulWidget {
+  final String greeting;
+  final String userName;
+  final String subtitle;
+  final String buttonLabel;
+  final VoidCallback onNewTask;
+
+  const _GreetingCard({
+    required this.greeting,
+    required this.userName,
+    required this.subtitle,
+    required this.buttonLabel,
+    required this.onNewTask,
+  });
+
+  @override
+  State<_GreetingCard> createState() => _GreetingCardState();
+}
+
+class _GreetingCardState extends State<_GreetingCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _floatAnim;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _glowAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat(reverse: true);
+
+    _floatAnim = Tween<double>(
+      begin: 0,
+      end: -8,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _fadeAnim = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _glowAnim = Tween<double>(
+      begin: 0.15,
+      end: 0.35,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  ({
+    List<Color> gradient,
+    IconData icon,
+    Color iconColor,
+    Color shadowColor,
+    Color buttonFg,
+  })
+  _timeTheme() {
+    final h = DateTime.now().hour;
+    if (h >= 5 && h < 12) {
+      // Morning — warm sunrise
+      return (
+        gradient: [const Color(0xFFFFA751), const Color(0xFFFFE259)],
+        icon: Icons.wb_sunny_rounded,
+        iconColor: const Color(0xFFFFF3C4),
+        shadowColor: const Color(0xFFFFA751),
+        buttonFg: const Color(0xFFE8930C),
+      );
+    } else if (h >= 12 && h < 17) {
+      // Afternoon — bright sky
+      return (
+        gradient: [const Color(0xFF56CCF2), const Color(0xFF2F80ED)],
+        icon: Icons.wb_cloudy_rounded,
+        iconColor: const Color(0xFFD6EFFF),
+        shadowColor: const Color(0xFF2F80ED),
+        buttonFg: const Color(0xFF2F80ED),
+      );
+    } else if (h >= 17 && h < 20) {
+      // Evening — sunset
+      return (
+        gradient: [const Color(0xFFFF6B6B), const Color(0xFFFF8E53)],
+        icon: Icons.wb_twilight_rounded,
+        iconColor: const Color(0xFFFFDDD2),
+        shadowColor: const Color(0xFFFF6B6B),
+        buttonFg: const Color(0xFFE85D3A),
+      );
+    } else {
+      // Night — deep blue/purple
+      return (
+        gradient: [const Color(0xFF2C3E6B), const Color(0xFF6B5CA5)],
+        icon: Icons.nightlight_round,
+        iconColor: const Color(0xFFE8E0FF),
+        shadowColor: const Color(0xFF2C3E6B),
+        buttonFg: const Color(0xFF6B5CA5),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = _timeTheme();
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: theme.gradient,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadowColor.withValues(alpha: _glowAnim.value),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                // ── Text + button ──
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${widget.greeting}, ${widget.userName}!',
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        widget.subtitle,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        height: 42,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.add_rounded, size: 20),
+                          label: Text(
+                            widget.buttonLabel,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: theme.buttonFg,
+                            elevation: 0,
+                            shape: const StadiumBorder(),
+                          ),
+                          onPressed: widget.onNewTask,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // ── Floating time icon ──
+                Transform.translate(
+                  offset: Offset(0, _floatAnim.value),
+                  child: Opacity(
+                    opacity: _fadeAnim.value,
+                    child: Icon(theme.icon, size: 64, color: theme.iconColor),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

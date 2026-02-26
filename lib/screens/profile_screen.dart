@@ -198,48 +198,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
               subtitle: email,
               isDark: isDark,
             ),
-            if (userId != null)
-              _InfoCard(
-                icon: Icons.tag_rounded,
-                title: 'User ID',
-                subtitle: '#$userId',
-                isDark: isDark,
-              ),
-            _InfoCard(
-              icon: Icons.verified_user_rounded,
-              title: 'Auth Status',
-              subtitle: auth.isAuthenticated
-                  ? 'Authenticated'
-                  : 'Not signed in',
-              isDark: isDark,
-            ),
 
+            // if (userId != null)
+            //   _InfoCard(
+            //     icon: Icons.tag_rounded,
+            //     title: 'User ID',
+            //     subtitle: '#$userId',
+            //     isDark: isDark,
+            //   ),
+            // _InfoCard(
+            //   icon: Icons.verified_user_rounded,
+            //   title: 'Auth Status',
+            //   subtitle: auth.isAuthenticated
+            //       ? 'Authenticated'
+            //       : 'Not signed in',
+            //   isDark: isDark,
+            // ),
             const SizedBox(height: 28),
 
             // ── App Info ──
-            _SectionHeader(title: 'App Info', isDark: isDark),
-            const SizedBox(height: 10),
+            // _SectionHeader(title: 'App Info', isDark: isDark),
+            // const SizedBox(height: 10),
 
-            _InfoCard(
-              icon: Icons.school_rounded,
-              title: AppLocalizations.tr('university', lang),
-              subtitle: 'Royal University of Phnom Penh',
-              isDark: isDark,
-            ),
-            _InfoCard(
-              icon: Icons.menu_book_rounded,
-              title: AppLocalizations.tr('course', lang),
-              subtitle: 'CS361 — Mobile App Development',
-              isDark: isDark,
-            ),
-            _InfoCard(
-              icon: Icons.calendar_today_rounded,
-              title: AppLocalizations.tr('semester', lang),
-              subtitle: 'Spring 2026',
-              isDark: isDark,
-            ),
+            // _InfoCard(
+            //   icon: Icons.school_rounded,
+            //   title: AppLocalizations.tr('university', lang),
+            //   subtitle: 'Paragon International University',
+            //   isDark: isDark,
+            // ),
+            // _InfoCard(
+            //   icon: Icons.menu_book_rounded,
+            //   title: AppLocalizations.tr('course', lang),
+            //   subtitle: 'CS361 — Mobile App Development',
+            //   isDark: isDark,
+            // ),
+            // _InfoCard(
+            //   icon: Icons.calendar_today_rounded,
+            //   title: AppLocalizations.tr('semester', lang),
+            //   subtitle: 'Spring 2026',
+            //   isDark: isDark,
+            // ),
 
-            const SizedBox(height: 28),
+            // const SizedBox(height: 28),
 
             // ── Logout button ──
             SizedBox(
@@ -401,11 +401,11 @@ class _InfoCard extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppConstants.accentLavender.withValues(alpha: 0.4),
+            color: AppConstants.accentLavender,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
-            child: Icon(icon, size: 22, color: AppConstants.primaryColor),
+            child: Icon(icon, size: 22, color: AppConstants.textPrimary),
           ),
         ),
         title: Text(

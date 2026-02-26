@@ -9,6 +9,7 @@ class TaskCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final ValueChanged<String>? onStatusChange;
 
   const TaskCard({
     super.key,
@@ -16,6 +17,7 @@ class TaskCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onStatusChange,
   });
 
   /// Format "2026-03-01" → "Mar 1"
@@ -40,6 +42,68 @@ class TaskCard extends StatelessWidget {
       return '${months[d.month - 1]} ${d.day}';
     } catch (_) {
       return raw.length > 10 ? raw.substring(0, 10) : raw;
+    }
+  }
+
+  void _showStatusMenu(BuildContext context, Offset position) async {
+    final statuses = [
+      (
+        'pending',
+        'Pending',
+        Icons.radio_button_unchecked,
+        AppConstants.primaryColor,
+      ),
+      (
+        'in_progress',
+        'In Progress',
+        Icons.timelapse_rounded,
+        AppConstants.warningColor,
+      ),
+      (
+        'completed',
+        'Completed',
+        Icons.check_circle_rounded,
+        AppConstants.successColor,
+      ),
+    ];
+
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx + 1,
+        position.dy + 1,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      items: statuses.map((s) {
+        final isActive = task.status == s.$1;
+        return PopupMenuItem<String>(
+          value: s.$1,
+          child: Row(
+            children: [
+              Icon(s.$3, size: 18, color: s.$4),
+              const SizedBox(width: 10),
+              Text(
+                s.$2,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  color: isActive ? s.$4 : null,
+                ),
+              ),
+              if (isActive) ...[
+                const Spacer(),
+                Icon(Icons.check_rounded, size: 16, color: s.$4),
+              ],
+            ],
+          ),
+        );
+      }).toList(),
+    );
+
+    if (selected != null && selected != task.status) {
+      onStatusChange?.call(selected);
     }
   }
 
@@ -92,7 +156,7 @@ class TaskCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: bgColor.withValues(alpha: 0.5),
+                    color: bgColor,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Center(
@@ -155,22 +219,43 @@ class TaskCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                           ],
-                          // ── Status badge ──
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: bgColor.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              task.statusLabel,
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppConstants.statusColor(task.status),
+                          // ── Status badge (tappable for quick change) ──
+                          GestureDetector(
+                            onTapDown: onStatusChange != null
+                                ? (details) => _showStatusMenu(
+                                    context,
+                                    details.globalPosition,
+                                  )
+                                : null,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: bgColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    task.statusLabel,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppConstants.textPrimary,
+                                    ),
+                                  ),
+                                  if (onStatusChange != null) ...[
+                                    const SizedBox(width: 2),
+                                    Icon(
+                                      Icons.arrow_drop_down_rounded,
+                                      size: 14,
+                                      color: AppConstants.textPrimary,
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                           ),
@@ -182,13 +267,13 @@ class TaskCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: catColor.withValues(alpha: 0.35),
+                              color: catColor,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Icon(
                               AppConstants.categoryIcon(task.category),
                               size: 12,
-                              color: catColor,
+                              color: AppConstants.textPrimary,
                             ),
                           ),
                         ],
@@ -197,25 +282,34 @@ class TaskCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // ── Circle checkbox indicator ──
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isCompleted
-                        ? AppConstants.successColor
-                        : Colors.transparent,
-                    border: Border.all(
+                // ── Circle checkbox indicator (tappable to toggle) ──
+                GestureDetector(
+                  onTap: onStatusChange != null
+                      ? () => onStatusChange!(
+                          task.status == 'completed' ? 'pending' : 'completed',
+                        )
+                      : null,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                       color: isCompleted
                           ? AppConstants.successColor
-                          : (isDark ? Colors.white24 : AppConstants.textLight),
-                      width: 2,
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: isCompleted
+                            ? AppConstants.successColor
+                            : (isDark
+                                  ? Colors.white24
+                                  : AppConstants.textLight),
+                        width: 2,
+                      ),
                     ),
+                    child: isCompleted
+                        ? const Icon(Icons.check, color: Colors.white, size: 16)
+                        : null,
                   ),
-                  child: isCompleted
-                      ? const Icon(Icons.check, color: Colors.white, size: 16)
-                      : null,
                 ),
               ],
             ),

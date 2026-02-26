@@ -160,7 +160,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppConstants.accentLavender.withValues(alpha: 0.4),
+                    color: AppConstants.accentLavender,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Center(
@@ -178,7 +178,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               CustomTextField(
                 controller: _titleCtrl,
                 label: AppLocalizations.tr('task_title', lang),
-                hint: AppLocalizations.tr('enter_title', lang),
+                hint: AppLocalizations.tr('enter your task title', lang),
                 prefixIcon: Icons.title_rounded,
                 validator: Validators.minLength3,
               ),
@@ -255,9 +255,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: selected
-                                  ? AppConstants.categoryColor(
-                                      cat,
-                                    ).withValues(alpha: 0.2)
+                                  ? AppConstants.categoryColor(cat)
                                   : (isDark
                                         ? AppConstants.darkCard
                                         : Colors.white),
@@ -279,7 +277,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                   AppConstants.categoryIcon(cat),
                                   size: 16,
                                   color: selected
-                                      ? AppConstants.categoryColor(cat)
+                                      ? AppConstants.textPrimary
                                       : (isDark
                                             ? Colors.white54
                                             : AppConstants.textSecondary),
@@ -293,7 +291,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                                         ? FontWeight.w600
                                         : FontWeight.w400,
                                     color: selected
-                                        ? AppConstants.categoryColor(cat)
+                                        ? AppConstants.textPrimary
                                         : (isDark
                                               ? Colors.white70
                                               : AppConstants.textPrimary),
@@ -309,25 +307,105 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 ),
               ),
 
-              // ── Status dropdown ──
+              // ── Status selector (tap to change) ──
               Padding(
                 padding: const EdgeInsets.only(bottom: 28),
-                child: DropdownButtonFormField<String>(
-                  value: _status,
-                  style: GoogleFonts.poppins(
-                    color: isDark ? Colors.white : AppConstants.textPrimary,
-                    fontSize: 14,
-                  ),
-                  dropdownColor: isDark ? AppConstants.darkCard : Colors.white,
-                  decoration: _fieldDecoration(
-                    AppLocalizations.tr('status', lang),
-                    Icons.flag_rounded,
-                    isDark,
-                  ),
-                  items: _statuses.entries.map((e) {
-                    return DropdownMenuItem(value: e.key, child: Text(e.value));
-                  }).toList(),
-                  onChanged: (v) => setState(() => _status = v!),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        AppLocalizations.tr('status', lang),
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? Colors.white70
+                              : AppConstants.textSecondary,
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: _statuses.entries.map((e) {
+                        final selected = _status == e.key;
+                        final color = AppConstants.statusColor(e.key);
+                        final bgColor = AppConstants.statusBgColor(e.key);
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: e.key != 'completed' ? 8 : 0,
+                            ),
+                            child: GestureDetector(
+                              onTap: () => setState(() => _status = e.key),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: selected
+                                      ? bgColor
+                                      : (isDark
+                                            ? AppConstants.darkCard
+                                            : Colors.white),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: selected
+                                        ? color
+                                        : (isDark
+                                              ? Colors.white12
+                                              : AppConstants.primaryLight
+                                                    .withValues(alpha: 0.3)),
+                                    width: selected ? 2 : 1,
+                                  ),
+                                  boxShadow: selected
+                                      ? [
+                                          BoxShadow(
+                                            color: color.withValues(
+                                              alpha: 0.25,
+                                            ),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      AppConstants.statusIcon(e.key),
+                                      size: 24,
+                                      color: selected
+                                          ? color
+                                          : (isDark
+                                                ? Colors.white38
+                                                : AppConstants.textSecondary),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      e.value,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        fontWeight: selected
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        color: selected
+                                            ? color
+                                            : (isDark
+                                                  ? Colors.white54
+                                                  : AppConstants.textSecondary),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
               ),
 
