@@ -14,7 +14,6 @@ import 'screens/main_shell.dart';
 import 'screens/add_task_screen.dart';
 import 'screens/edit_task_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/notifications_screen.dart';
 import 'utils/constants.dart';
 
 void main() async {
@@ -70,14 +69,32 @@ class MyApp extends StatelessWidget {
         ),
         cardTheme: CardThemeData(
           elevation: 0,
-          color: AppConstants.cardColor,
+          color: AppConstants.glassCardLight,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.cardRadius),
           ),
         ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: AppConstants.glassDialogLight,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+          ),
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: AppConstants.glassSheetLight,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+        ),
+        popupMenuTheme: PopupMenuThemeData(
+          color: AppConstants.glassDialogLight,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: AppConstants.backgroundColor,
+          fillColor: AppConstants.glassInputLight,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppConstants.defaultRadius),
             borderSide: BorderSide.none,
@@ -162,14 +179,32 @@ class MyApp extends StatelessWidget {
         ),
         cardTheme: CardThemeData(
           elevation: 0,
-          color: AppConstants.darkCard,
+          color: AppConstants.glassCardDark,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.cardRadius),
           ),
         ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: AppConstants.glassDialogDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+          ),
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: AppConstants.glassSheetDark,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+        ),
+        popupMenuTheme: PopupMenuThemeData(
+          color: AppConstants.glassDialogDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: AppConstants.darkSurface,
+          fillColor: AppConstants.glassInputDark,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppConstants.defaultRadius),
             borderSide: BorderSide.none,
@@ -245,9 +280,9 @@ class MyApp extends StatelessWidget {
         '/': (context) => const MainShell(initialIndex: 0),
         '/tasks': (context) => const MainShell(initialIndex: 1),
         '/profile': (context) => const MainShell(initialIndex: 2),
+        '/notifications': (context) => const MainShell(initialIndex: 3),
         '/add': (context) => const AddTaskScreen(),
         '/settings': (context) => const SettingsScreen(),
-        '/notifications': (context) => const NotificationsScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/edit') {

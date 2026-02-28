@@ -8,6 +8,7 @@ import '../services/auth_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/constants.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/glass_container.dart';
 
 /// Tiimo‑style Home Screen — "Today" view with date header, stats and tasks.
 class HomeScreen extends StatefulWidget {
@@ -309,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 32),
+                      SizedBox(height: AppConstants.bottomNavBarSpace),
                     ],
                   );
                 },
@@ -343,13 +344,9 @@ class _StatBubble extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
+          GlassContainer(
+            borderRadius: 16,
             padding: const EdgeInsets.symmetric(vertical: 18),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(16),
-            ),
             child: Center(
               child: Icon(
                 icon,
@@ -476,7 +473,6 @@ class _MiniTaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCompleted = task.status == 'completed';
-    final bgColor = AppConstants.statusBgColor(task.status);
     final provider = context.read<TaskProvider>();
 
     return Dismissible(
@@ -485,7 +481,7 @@ class _MiniTaskTile extends StatelessWidget {
       background: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
         decoration: BoxDecoration(
-          color: AppConstants.successColor,
+          color: AppConstants.successColor.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerLeft,
@@ -508,7 +504,7 @@ class _MiniTaskTile extends StatelessWidget {
       secondaryBackground: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
         decoration: BoxDecoration(
-          color: AppConstants.errorColor,
+          color: AppConstants.errorColor.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerRight,
@@ -538,6 +534,9 @@ class _MiniTaskTile extends StatelessWidget {
           final confirmed = await showDialog<bool>(
             context: parentContext,
             builder: (ctx) => AlertDialog(
+              backgroundColor: Theme.of(ctx).brightness == Brightness.dark
+                  ? AppConstants.glassDialogDark
+                  : AppConstants.glassDialogLight,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -566,31 +565,9 @@ class _MiniTaskTile extends StatelessWidget {
           return false;
         }
       },
-      child: Container(
+      child: GlassContainer(
+        borderRadius: 16,
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        decoration: BoxDecoration(
-          color: isCompleted
-              ? (isDark
-                    ? AppConstants.accentMint.withValues(alpha: 0.08)
-                    : AppConstants.accentMint.withValues(alpha: 0.1))
-              : (isDark ? AppConstants.darkCard : Colors.white),
-          borderRadius: BorderRadius.circular(16),
-          border: isCompleted
-              ? Border.all(
-                  color: AppConstants.successColor.withValues(alpha: 0.25),
-                  width: 1,
-                )
-              : null,
-          boxShadow: isDark
-              ? []
-              : [
-                  BoxShadow(
-                    color: AppConstants.primaryColor.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-        ),
         child: Material(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(16),
@@ -606,7 +583,7 @@ class _MiniTaskTile extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: bgColor,
+                      color: AppConstants.statusBgColorGlass(task.status),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(

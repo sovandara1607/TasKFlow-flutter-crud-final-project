@@ -280,6 +280,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
+  liquid_glass_ui:
+    dependency: "direct main"
+    description:
+      name: liquid_glass_ui
+      sha256: b949973a841a3d4f10dff88b1f0bb21cc6fe2af62cb8a3a6852eb9c63b7a3c68
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
   local_auth:
     dependency: "direct main"
     description:

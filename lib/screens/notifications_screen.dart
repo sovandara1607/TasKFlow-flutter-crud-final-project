@@ -7,6 +7,7 @@ import '../services/app_settings_provider.dart';
 import '../services/notification_service.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/constants.dart';
+import '../widgets/glass_container.dart';
 
 /// Notifications screen showing overdue, due-today, and upcoming tasks.
 class NotificationsScreen extends StatelessWidget {
@@ -69,7 +70,12 @@ class NotificationsScreen extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          AppConstants.bottomNavBarSpace,
+        ),
         children: [
           if (overdue.isEmpty && dueToday.isEmpty && upcoming.isEmpty)
             Padding(
@@ -227,21 +233,9 @@ class _NotifTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GlassContainer(
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: AppConstants.primaryColor.withValues(alpha: 0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
+      borderRadius: 14,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         leading: Container(

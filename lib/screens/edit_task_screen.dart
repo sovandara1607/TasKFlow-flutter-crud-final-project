@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -5,7 +6,6 @@ import '../models/task.dart';
 import '../services/task_provider.dart';
 import '../services/app_settings_provider.dart';
 import '../l10n/app_localizations.dart';
-import '../widgets/custom_text_field.dart';
 import '../widgets/app_dialogs.dart';
 import '../utils/constants.dart';
 import '../utils/validators.dart';
@@ -112,391 +112,473 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     }
   }
 
-  InputDecoration _fieldDecoration(String label, IconData icon, bool isDark) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: GoogleFonts.poppins(
-        color: isDark ? Colors.white54 : AppConstants.textSecondary,
-      ),
-      prefixIcon: Icon(icon, color: AppConstants.primaryColor),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(
-          color: AppConstants.primaryLight.withValues(alpha: 0.3),
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(
-          color: isDark
-              ? Colors.white12
-              : AppConstants.primaryLight.withValues(alpha: 0.3),
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: AppConstants.primaryColor,
-          width: 2,
-        ),
-      ),
-      filled: true,
-      fillColor: isDark ? AppConstants.darkCard : AppConstants.backgroundColor,
+  Future<void> _deleteTask() async {
+    final nav = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final provider = context.read<TaskProvider>();
+    final confirmed = await AppDialogs.showConfirmation(
+      context: context,
+      title: 'Delete Task',
+      message: 'Delete "${widget.task.title}"?',
     );
+    if (!confirmed || !mounted) return;
+    await provider.deleteTask(widget.task.id!);
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: const Text('Task deleted.'),
+        backgroundColor: AppConstants.successColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+    nav.pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final lang = context.watch<AppSettingsProvider>().locale;
+    final headerColor = isDark
+        ? const Color(0xFF1E1E1E)
+        : AppConstants.primaryColor;
+    final cardColor = isDark ? AppConstants.darkBackground : Colors.white;
+    final dateStr = _dueDate != null
+        ? '${_dueDate!.day.toString().padLeft(2, '0')} / ${_dueDate!.month.toString().padLeft(2, '0')} / ${_dueDate!.year}'
+        : AppLocalizations.tr('select_due_date', lang);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.tr('edit_task', lang),
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w700,
-            color: isDark ? Colors.white : AppConstants.textPrimary,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_rounded, color: Color(0xFFFF6B6B)),
-            tooltip: AppLocalizations.tr('delete', lang),
-            onPressed: () async {
-              final nav = Navigator.of(context);
-              final messenger = ScaffoldMessenger.of(context);
-              final provider = context.read<TaskProvider>();
-              final confirmed = await AppDialogs.showConfirmation(
-                context: context,
-                title: 'Delete Task',
-                message: 'Delete "${widget.task.title}"?',
-              );
-              if (!confirmed || !mounted) return;
-              await provider.deleteTask(widget.task.id!);
-              if (!mounted) return;
-              messenger.showSnackBar(
-                SnackBar(
-                  content: const Text('Task deleted.'),
-                  backgroundColor: AppConstants.successColor,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
-              nav.pop();
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Icon header ──
-              Center(
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: AppConstants.statusBgColor(_status),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      AppConstants.statusIcon(_status),
-                      size: 28,
-                      color: AppConstants.statusColor(_status),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // ── Task Title ──
-              CustomTextField(
-                controller: _titleCtrl,
-                label: AppLocalizations.tr('task_title', lang),
-                hint: AppLocalizations.tr('enter_title', lang),
-                prefixIcon: Icons.title_rounded,
-                validator: Validators.minLength3,
-              ),
-
-              // ── Description ──
-              CustomTextField(
-                controller: _descCtrl,
-                label: AppLocalizations.tr('description', lang),
-                hint: AppLocalizations.tr('enter_description', lang),
-                prefixIcon: Icons.description_rounded,
-                maxLines: 3,
-                validator: Validators.required,
-              ),
-
-              // ── Due Date Picker ──
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: InkWell(
-                  onTap: _pickDate,
-                  borderRadius: BorderRadius.circular(16),
-                  child: InputDecorator(
-                    decoration: _fieldDecoration(
-                      AppLocalizations.tr('due_date', lang),
-                      Icons.calendar_today_rounded,
-                      isDark,
-                    ),
-                    child: Text(
-                      _dueDate != null
-                          ? '${_dueDate!.year}-${_dueDate!.month.toString().padLeft(2, '0')}-${_dueDate!.day.toString().padLeft(2, '0')}'
-                          : AppLocalizations.tr('select_date', lang),
-                      style: GoogleFonts.poppins(
-                        color: _dueDate != null
-                            ? (isDark ? Colors.white : AppConstants.textPrimary)
-                            : (isDark
-                                  ? Colors.white38
-                                  : AppConstants.textLight),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // ── Category selector ──
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+      backgroundColor: headerColor,
+      body: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            // ── COLORED HEADER ──
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4, bottom: 8),
-                      child: Text(
-                        AppLocalizations.tr('category', lang),
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? Colors.white70
-                              : AppConstants.textSecondary,
+                    // Nav bar
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back_ios_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          onPressed: () => Navigator.pop(context),
                         ),
-                      ),
-                    ),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: AppConstants.categories.map((cat) {
-                        final selected = _category == cat;
-                        return GestureDetector(
-                          onTap: () => setState(() => _category = cat),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.tr('edit_task', lang),
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
                             ),
-                            decoration: BoxDecoration(
-                              color: selected
-                                  ? AppConstants.categoryColor(cat)
-                                  : (isDark
-                                        ? AppConstants.darkCard
-                                        : Colors.white),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: selected
-                                    ? AppConstants.categoryColor(cat)
-                                    : (isDark
-                                          ? Colors.white12
-                                          : AppConstants.primaryLight
-                                                .withValues(alpha: 0.3)),
-                                width: selected ? 2 : 1,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Color(0xFFFF6B6B),
+                            size: 22,
+                          ),
+                          onPressed: _deleteTask,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Title + Date in header
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.tr('task_title', lang),
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white60,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.20),
+                                  ),
+                                ),
+                                child: TextFormField(
+                                  controller: _titleCtrl,
+                                  validator: Validators.minLength3,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: AppLocalizations.tr(
+                                      'enter_task_title',
+                                      lang,
+                                    ),
+                                    hintStyle: GoogleFonts.poppins(
+                                      color: Colors.white30,
+                                      fontSize: 16,
+                                    ),
+                                    errorStyle: GoogleFonts.poppins(
+                                      color: const Color(0xFFFF6B6B),
+                                      fontSize: 12,
+                                    ),
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            AppLocalizations.tr('due_date', lang),
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white60,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          GestureDetector(
+                            onTap: _pickDate,
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
-                                  AppConstants.categoryIcon(cat),
+                                const Icon(
+                                  Icons.calendar_today_rounded,
                                   size: 16,
-                                  color: selected
-                                      ? AppConstants.textPrimary
-                                      : (isDark
-                                            ? Colors.white54
-                                            : AppConstants.textSecondary),
+                                  color: Colors.white70,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 8),
                                 Text(
-                                  AppConstants.categoryLabel(cat),
+                                  dateStr,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    fontWeight: selected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                    color: selected
-                                        ? AppConstants.textPrimary
-                                        : (isDark
-                                              ? Colors.white70
-                                              : AppConstants.textPrimary),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: _dueDate != null
+                                        ? Colors.white
+                                        : Colors.white38,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        );
-                      }).toList(),
+                        ],
+                      ),
                     ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
+            ),
 
-              // ── Status selector (tap to change) ──
-              Padding(
-                padding: const EdgeInsets.only(bottom: 28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4, bottom: 8),
-                      child: Text(
-                        AppLocalizations.tr('status', lang),
+            // ── WHITE FORM CARD ──
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 16,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 40),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Description ──
+                      Text(
+                        AppLocalizations.tr('description', lang),
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                           color: isDark
-                              ? Colors.white70
-                              : AppConstants.textSecondary,
+                              ? Colors.white
+                              : AppConstants.textPrimary,
                         ),
                       ),
-                    ),
-                    Row(
-                      children: _statuses.entries.map((e) {
-                        final selected = _status == e.key;
-                        final color = AppConstants.statusColor(e.key);
-                        final bgColor = AppConstants.statusBgColor(e.key);
-                        return Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              right: e.key != 'completed' ? 8 : 0,
-                            ),
-                            child: GestureDetector(
-                              onTap: () => setState(() => _status = e.key),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: selected
-                                      ? bgColor
-                                      : (isDark
-                                            ? AppConstants.darkCard
-                                            : Colors.white),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: selected
-                                        ? color
-                                        : (isDark
-                                              ? Colors.white12
-                                              : AppConstants.primaryLight
-                                                    .withValues(alpha: 0.3)),
-                                    width: selected ? 2 : 1,
-                                  ),
-                                  boxShadow: selected
-                                      ? [
-                                          BoxShadow(
-                                            color: color.withValues(
-                                              alpha: 0.25,
-                                            ),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ]
-                                      : [],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      AppConstants.statusIcon(e.key),
-                                      size: 24,
-                                      color: selected
-                                          ? color
-                                          : (isDark
-                                                ? Colors.white38
-                                                : AppConstants.textSecondary),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      e.value,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        fontWeight: selected
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                        color: selected
-                                            ? color
-                                            : (isDark
-                                                  ? Colors.white54
-                                                  : AppConstants.textSecondary),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _descCtrl,
+                        maxLines: 3,
+                        validator: Validators.required,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: isDark
+                              ? Colors.white
+                              : AppConstants.textPrimary,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.tr(
+                            'enter_description',
+                            lang,
+                          ),
+                          hintStyle: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: isDark
+                                ? Colors.white30
+                                : AppConstants.textLight,
+                          ),
+                          filled: true,
+                          fillColor: isDark
+                              ? Colors.white.withValues(alpha: 0.06)
+                              : const Color(0xFFF8F8F8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: AppConstants.primaryColor.withValues(
+                                alpha: 0.3,
                               ),
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
+                          contentPadding: const EdgeInsets.all(16),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
 
-              // ── Save ──
-              SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  icon: _isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                      // ── Category ──
+                      Text(
+                        AppLocalizations.tr('category', lang),
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? Colors.white
+                              : AppConstants.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: AppConstants.categories.map((cat) {
+                          final selected = _category == cat;
+                          return GestureDetector(
+                            onTap: () => setState(() => _category = cat),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: selected
+                                    ? AppConstants.primaryColor
+                                    : (isDark
+                                          ? Colors.white.withValues(alpha: 0.08)
+                                          : const Color(0xFFF0F0F0)),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: selected
+                                      ? AppConstants.primaryColor
+                                      : (isDark
+                                            ? Colors.white.withValues(
+                                                alpha: 0.15,
+                                              )
+                                            : const Color(0xFFE0E0E0)),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    AppConstants.categoryIcon(cat),
+                                    size: 15,
+                                    color: selected
+                                        ? Colors.white
+                                        : (isDark
+                                              ? Colors.white60
+                                              : AppConstants.textSecondary),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    AppConstants.categoryLabel(cat),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: selected
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                      color: selected
+                                          ? Colors.white
+                                          : (isDark
+                                                ? Colors.white70
+                                                : AppConstants.textPrimary),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Status ──
+                      Text(
+                        AppLocalizations.tr('status', lang),
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? Colors.white
+                              : AppConstants.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: _statuses.entries.map((e) {
+                          final selected = _status == e.key;
+                          final color = AppConstants.statusColor(e.key);
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                right: e.key != 'completed' ? 8 : 0,
+                              ),
+                              child: GestureDetector(
+                                onTap: () => setState(() => _status = e.key),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: selected
+                                        ? color.withValues(alpha: 0.15)
+                                        : (isDark
+                                              ? Colors.white.withValues(
+                                                  alpha: 0.06,
+                                                )
+                                              : const Color(0xFFF8F8F8)),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: selected
+                                          ? color
+                                          : (isDark
+                                                ? Colors.white12
+                                                : const Color(0xFFE8E8E8)),
+                                      width: selected ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        AppConstants.statusIcon(e.key),
+                                        size: 22,
+                                        color: selected
+                                            ? color
+                                            : (isDark
+                                                  ? Colors.white38
+                                                  : AppConstants.textLight),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        e.value,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          fontWeight: selected
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                          color: selected
+                                              ? color
+                                              : (isDark
+                                                    ? Colors.white54
+                                                    : AppConstants
+                                                          .textSecondary),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+
+                      const SizedBox(height: 36),
+
+                      // ── Update Task button (solid, rounded) ──
+                      SizedBox(
+                        width: double.infinity,
+                        height: 54,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppConstants.primaryColor,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
-                        )
-                      : const Icon(Icons.save_rounded),
-                  label: Text(
-                    _isSaving
-                        ? AppLocalizations.tr('saving', lang)
-                        : AppLocalizations.tr('update_task', lang),
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  onPressed: _isSaving ? null : _submit,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // ── Cancel ──
-              SizedBox(
-                height: 48,
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    AppLocalizations.tr('cancel', lang),
-                    style: GoogleFonts.poppins(
-                      color: isDark
-                          ? Colors.white54
-                          : AppConstants.textSecondary,
-                    ),
+                          icon: _isSaving
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.save_rounded, size: 20),
+                          label: Text(
+                            _isSaving
+                                ? AppLocalizations.tr('saving', lang)
+                                : AppLocalizations.tr('update_task', lang),
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          onPressed: _isSaving ? null : _submit,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

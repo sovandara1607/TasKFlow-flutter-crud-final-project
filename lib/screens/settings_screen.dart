@@ -8,6 +8,7 @@ import '../services/task_provider.dart';
 import '../services/notification_service.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/constants.dart';
+import '../widgets/glass_container.dart';
 
 /// Settings Screen — All toggles wired to AppSettingsProvider for persistence.
 class SettingsScreen extends StatelessWidget {
@@ -85,7 +86,9 @@ class SettingsScreen extends StatelessWidget {
                 trailing: DropdownButton<String>(
                   value: lang,
                   underline: const SizedBox(),
-                  dropdownColor: isDark ? AppConstants.darkCard : Colors.white,
+                  dropdownColor: isDark
+                      ? AppConstants.glassDialogDark
+                      : AppConstants.glassDialogLight,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: isDark ? Colors.white : AppConstants.textPrimary,
@@ -186,8 +189,8 @@ class SettingsScreen extends StatelessWidget {
                     context: context,
                     builder: (_) => AlertDialog(
                       backgroundColor: isDark
-                          ? AppConstants.darkCard
-                          : Colors.white,
+                          ? AppConstants.glassDialogDark
+                          : AppConstants.glassDialogLight,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           AppConstants.cardRadius,
@@ -286,8 +289,8 @@ class SettingsScreen extends StatelessWidget {
                   context: context,
                   builder: (_) => AlertDialog(
                     backgroundColor: isDark
-                        ? AppConstants.darkCard
-                        : Colors.white,
+                        ? AppConstants.glassDialogDark
+                        : AppConstants.glassDialogLight,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
                         AppConstants.cardRadius,
@@ -369,20 +372,8 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppConstants.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: AppConstants.primaryColor.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-      ),
+    return GlassContainer(
+      borderRadius: AppConstants.cardRadius,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppConstants.cardRadius),
         child: Column(children: children),

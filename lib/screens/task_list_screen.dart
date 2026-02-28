@@ -9,6 +9,7 @@ import '../l10n/app_localizations.dart';
 import '../widgets/task_card.dart';
 import '../widgets/app_dialogs.dart';
 import '../utils/constants.dart';
+import '../widgets/glass_container.dart';
 
 /// Tiimo‑style Task List Screen — filter chips, swipe gestures, categories.
 class TaskListScreen extends StatefulWidget {
@@ -140,7 +141,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: AppConstants.statusBgColor(currentStatus),
+                    color: AppConstants.statusBgColorGlass(currentStatus),
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Center(
@@ -186,7 +187,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppConstants.statusBgColor(currentStatus),
+                        color: AppConstants.statusBgColorGlass(currentStatus),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -217,7 +218,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppConstants.categoryColor(task.category),
+                      color: AppConstants.categoryColorGlass(task.category),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -386,22 +387,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
           // ── Search bar ──
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDark ? AppConstants.darkCard : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: isDark
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: AppConstants.primaryColor.withValues(
-                            alpha: 0.06,
-                          ),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-              ),
+            child: GlassContainer(
+              borderRadius: 16,
               child: TextField(
                 controller: _searchCtrl,
                 onChanged: (v) => setState(() => _searchQuery = v),
@@ -605,7 +592,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   color: AppConstants.primaryColor,
                   onRefresh: () => provider.fetchTasks(),
                   child: ListView.builder(
-                    padding: const EdgeInsets.only(top: 4, bottom: 80),
+                    padding: EdgeInsets.only(
+                      top: 4,
+                      bottom: AppConstants.bottomNavBarSpace,
+                    ),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final task = filtered[index];
@@ -671,16 +661,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         ],
       ),
-      // ── FAB ──
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'add_task_fab',
-        icon: const Icon(Icons.add_rounded),
-        label: Text(
-          AppLocalizations.tr('new_task', lang),
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        onPressed: () => Navigator.pushNamed(context, '/add'),
-      ),
     );
   }
 }
@@ -711,8 +691,18 @@ class _FilterChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? AppConstants.primaryColor
-              : (isDark ? AppConstants.darkCard : Colors.white),
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.white.withValues(alpha: 0.75)),
           borderRadius: BorderRadius.circular(12),
+          border: selected
+              ? null
+              : Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.6),
+                  width: 0.5,
+                ),
           boxShadow: selected
               ? [
                   BoxShadow(
@@ -721,8 +711,6 @@ class _FilterChip extends StatelessWidget {
                     offset: const Offset(0, 3),
                   ),
                 ]
-              : isDark
-              ? []
               : [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),

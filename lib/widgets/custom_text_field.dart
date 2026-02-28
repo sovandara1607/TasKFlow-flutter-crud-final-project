@@ -1,7 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
 
-/// A reusable styled text form field widget — dark mode aware.
+/// Liquid-glass styled text form field — frosted background,
+/// translucent border, dark mode aware.
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -30,24 +34,87 @@ class CustomTextField extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: controller,
-        validator: validator,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        obscureText: obscureText,
-        style: TextStyle(
-          color: isDark ? Colors.white : AppConstants.textPrimary,
-        ),
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
-          fillColor: isDark
-              ? AppConstants.darkCard
-              : Theme.of(context).colorScheme.surface,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: TextFormField(
+            controller: controller,
+            validator: validator,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            obscureText: obscureText,
+            style: GoogleFonts.poppins(
+              color: isDark ? Colors.white : AppConstants.textPrimary,
+              fontSize: 14,
+            ),
+            decoration: InputDecoration(
+              labelText: label,
+              labelStyle: GoogleFonts.poppins(
+                color: isDark ? Colors.white54 : AppConstants.textSecondary,
+                fontSize: 13,
+              ),
+              hintText: hint,
+              hintStyle: GoogleFonts.poppins(
+                color: isDark ? Colors.white30 : AppConstants.textLight,
+                fontSize: 13,
+              ),
+              prefixIcon: prefixIcon != null
+                  ? Icon(
+                      prefixIcon,
+                      color: isDark
+                          ? Colors.white60
+                          : AppConstants.primaryLight,
+                    )
+                  : null,
+              filled: true,
+              fillColor: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.white.withValues(alpha: 0.70),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : Colors.grey.withValues(alpha: 0.20),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : Colors.grey.withValues(alpha: 0.20),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : AppConstants.primaryColor.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: AppConstants.errorColor.withValues(alpha: 0.5),
+                ),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: AppConstants.errorColor,
+                  width: 1.5,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+          ),
         ),
       ),
     );

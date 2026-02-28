@@ -7,6 +7,8 @@ import '../services/auth_provider.dart';
 import '../services/app_settings_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/constants.dart';
+import '../widgets/glass_container.dart';
+import '../widgets/app_dialogs.dart';
 
 /// Profile screen that displays the authenticated user's real credentials
 /// and live task statistics fetched from the API.
@@ -53,7 +55,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? AppConstants.darkCard : Colors.white,
+      backgroundColor: isDark
+          ? AppConstants.glassSheetDark
+          : AppConstants.glassSheetLight,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -187,68 +191,106 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Column(
           children: [
-            // ── Avatar ──
-            Center(
-              child: Container(
-                width: 116,
-                height: 116,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [
-                      AppConstants.primaryLight,
-                      AppConstants.accentPink,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppConstants.primaryColor.withValues(alpha: 0.2),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
+            // ── Profile card — avatar, name, email, edit button ──
+            GlassContainer(
+              borderRadius: 22,
+              padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+              child: Column(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppConstants.primaryLight,
+                          AppConstants.accentSky,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppConstants.primaryColor.withValues(
+                            alpha: 0.15,
+                          ),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(3),
-                  child: CircleAvatar(
-                    radius: 54,
-                    backgroundColor: isDark
-                        ? AppConstants.darkCard
-                        : Colors.grey[200],
-                    child: Text(
-                      initial,
-                      style: GoogleFonts.poppins(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w700,
-                        color: AppConstants.primaryColor,
+                    child: Center(
+                      child: Text(
+                        initial,
+                        style: GoogleFonts.poppins(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  Text(
+                    username,
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : AppConstants.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    email,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: isDark
+                          ? Colors.white54
+                          : AppConstants.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: OutlinedButton.icon(
+                      icon: Icon(
+                        Icons.edit_rounded,
+                        size: 16,
+                        color: isDark
+                            ? Colors.white70
+                            : AppConstants.primaryColor,
+                      ),
+                      label: Text(
+                        'Edit Profile',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: isDark
+                              ? Colors.white70
+                              : AppConstants.primaryColor,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.15)
+                              : AppConstants.primaryColor.withValues(
+                                  alpha: 0.25,
+                                ),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => _showEditProfileSheet(context),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-
-            // ── Username ──
-            Text(
-              username,
-              style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : AppConstants.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              email,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: isDark ? Colors.white54 : AppConstants.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
             // ── Task Statistics ──
             _SectionHeader(
@@ -261,6 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _StatCard(
                   label: 'Total',
                   value: _loadingTasks ? '…' : '$total',
+                  icon: Icons.assignment_outlined,
                   color: AppConstants.primaryColor,
                   isDark: isDark,
                 ),
@@ -268,6 +311,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _StatCard(
                   label: 'Done',
                   value: _loadingTasks ? '…' : '$completed',
+                  icon: Icons.check_circle_outline_rounded,
                   color: AppConstants.successColor,
                   isDark: isDark,
                 ),
@@ -275,12 +319,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _StatCard(
                   label: 'Pending',
                   value: _loadingTasks ? '…' : '$pending',
+                  icon: Icons.pending_actions_rounded,
                   color: AppConstants.warningColor,
                   isDark: isDark,
                 ),
               ],
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
             // ── Account Details ──
             _SectionHeader(
@@ -288,49 +333,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
               isDark: isDark,
             ),
             const SizedBox(height: 10),
-
-            _InfoCard(
-              icon: Icons.person_rounded,
-              title: 'Username',
-              subtitle: username,
-              isDark: isDark,
-            ),
-            _InfoCard(
-              icon: Icons.email_rounded,
-              title: 'Email',
-              subtitle: email,
-              isDark: isDark,
-            ),
-            _InfoCard(
-              icon: Icons.phone_rounded,
-              title: 'Phone',
-              subtitle: phone.isNotEmpty ? phone : '—',
-              isDark: isDark,
-            ),
-            const SizedBox(height: 16),
-
-            // ── Edit Profile button ──
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.edit_rounded, size: 18),
-                label: Text(
-                  'Edit Profile',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
+            GlassContainer(
+              borderRadius: 18,
+              child: Column(
+                children: [
+                  _InfoRow(
+                    icon: Icons.person_rounded,
+                    title: 'Username',
+                    subtitle: username,
+                    isDark: isDark,
                   ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                  Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    indent: 56,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : Colors.grey.withValues(alpha: 0.12),
                   ),
-                  elevation: 0,
-                ),
-                onPressed: () => _showEditProfileSheet(context),
+                  _InfoRow(
+                    icon: Icons.email_rounded,
+                    title: 'Email',
+                    subtitle: email,
+                    isDark: isDark,
+                  ),
+                  Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    indent: 56,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : Colors.grey.withValues(alpha: 0.12),
+                  ),
+                  _InfoRow(
+                    icon: Icons.phone_rounded,
+                    title: 'Phone',
+                    subtitle: phone.isNotEmpty ? phone : '—',
+                    isDark: isDark,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 28),
@@ -338,26 +379,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // ── Logout button ──
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 48,
               child: OutlinedButton.icon(
                 icon: const Icon(
                   Icons.logout_rounded,
+                  size: 18,
                   color: AppConstants.errorColor,
                 ),
                 label: Text(
                   AppLocalizations.tr('logout', lang),
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
+                    fontSize: 14,
                     color: AppConstants.errorColor,
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppConstants.errorColor),
+                  side: BorderSide(
+                    color: AppConstants.errorColor.withValues(alpha: 0.25),
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 onPressed: () async {
+                  final confirmed = await AppDialogs.showConfirmation(
+                    context: context,
+                    title: AppLocalizations.tr('log_out', lang),
+                    message: AppLocalizations.tr('log_out_confirm', lang),
+                    confirmText: AppLocalizations.tr('log_out', lang),
+                    confirmColor: AppConstants.errorColor,
+                  );
+                  if (!confirmed || !mounted) return;
                   final auth = context.read<AuthProvider>();
                   await auth.logout();
                   ApiService.setToken(null);
@@ -371,7 +424,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: AppConstants.bottomNavBarSpace),
           ],
         ),
       ),
@@ -405,11 +458,13 @@ class _SectionHeader extends StatelessWidget {
 class _StatCard extends StatelessWidget {
   final String label;
   final String value;
+  final IconData icon;
   final Color color;
   final bool isDark;
   const _StatCard({
     required this.label,
     required this.value,
+    required this.icon,
     required this.color,
     required this.isDark,
   });
@@ -417,27 +472,17 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        decoration: BoxDecoration(
-          color: isDark ? AppConstants.darkCard : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: isDark
-              ? []
-              : [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.1),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-        ),
+      child: GlassContainer(
+        borderRadius: 16,
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Column(
           children: [
+            Icon(icon, size: 22, color: color.withValues(alpha: 0.7)),
+            const SizedBox(height: 8),
             Text(
               value,
               style: GoogleFonts.poppins(
-                fontSize: 26,
+                fontSize: 24,
                 fontWeight: FontWeight.w800,
                 color: color,
               ),
@@ -446,7 +491,7 @@ class _StatCard extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.poppins(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w500,
                 color: isDark ? Colors.white54 : AppConstants.textSecondary,
               ),
@@ -458,14 +503,14 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ── Info card ──
-class _InfoCard extends StatelessWidget {
+// ── Info row (used inside a single GlassContainer) ──
+class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
   final bool isDark;
 
-  const _InfoCard({
+  const _InfoRow({
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -474,49 +519,48 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: isDark ? AppConstants.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: AppConstants.primaryColor.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : AppConstants.accentLavender.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: AppConstants.primaryLight),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 11,
+                    color: isDark ? Colors.white38 : AppConstants.textSecondary,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: isDark ? Colors.white : AppConstants.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        leading: Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: AppConstants.accentLavender,
-            borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          child: Center(
-            child: Icon(icon, size: 22, color: AppConstants.textPrimary),
-          ),
-        ),
-        title: Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-            color: isDark ? Colors.white : AppConstants.textPrimary,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: isDark ? Colors.white54 : AppConstants.textSecondary,
-          ),
-        ),
+        ],
       ),
     );
   }

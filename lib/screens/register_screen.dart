@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../utils/constants.dart';
 import '../utils/validators.dart';
 import '../widgets/custom_text_field.dart';
+import '../widgets/glass_container.dart';
 
 /// Tiimo-style registration screen.
 class RegisterScreen extends StatefulWidget {
@@ -84,11 +85,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: isDark
-                ? [AppConstants.darkBackground, const Color(0xFF2C2C2C)]
+                ? [
+                    AppConstants.darkBackground,
+                    const Color(0xFF2C2C2C).withValues(alpha: 0.85),
+                  ]
                 : [
-                    Colors.white,
-                    const Color(0xFFF5F5F5),
-                    const Color(0xFFE0E0E0),
+                    Colors.white.withValues(alpha: 0.92),
+                    const Color(0xFFF5F5F5).withValues(alpha: 0.88),
+                    const Color(0xFFE0E0E0).withValues(alpha: 0.80),
                   ],
           ),
         ),
@@ -100,28 +104,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // ── Logo ──
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: isDark ? AppConstants.darkCard : Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppConstants.primaryColor.withValues(
-                            alpha: 0.2,
-                          ),
-                          blurRadius: 30,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.check_rounded,
-                        size: 40,
-                        color: AppConstants.primaryColor,
-                      ),
+                  GlassContainer(
+                    borderRadius: 40,
+                    padding: const EdgeInsets.all(20),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      size: 40,
+                      color: AppConstants.primaryColor,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -147,25 +136,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 32),
 
                   // ── Form Card ──
-                  Container(
+                  GlassContainer(
+                    borderRadius: AppConstants.cardRadius,
                     padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppConstants.darkCard : Colors.white,
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.cardRadius,
-                      ),
-                      boxShadow: isDark
-                          ? []
-                          : [
-                              BoxShadow(
-                                color: AppConstants.primaryColor.withValues(
-                                  alpha: 0.08,
-                                ),
-                                blurRadius: 24,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                    ),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -229,8 +202,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 filled: true,
                                 fillColor: isDark
-                                    ? AppConstants.darkCard
-                                    : Theme.of(context).colorScheme.surface,
+                                    ? AppConstants.glassInputDark
+                                    : AppConstants.glassInputLight,
                               ),
                             ),
                           ),
@@ -277,8 +250,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 filled: true,
                                 fillColor: isDark
-                                    ? AppConstants.darkCard
-                                    : Theme.of(context).colorScheme.surface,
+                                    ? AppConstants.glassInputDark
+                                    : AppConstants.glassInputLight,
                               ),
                             ),
                           ),

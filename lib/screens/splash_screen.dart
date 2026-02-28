@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_provider.dart';
 import '../services/api_service.dart';
 import '../utils/constants.dart';
+import '../widgets/glass_container.dart';
 
 /// Tiimo‑style splash screen with gradient and animated logo.
 class SplashScreen extends StatefulWidget {
@@ -82,26 +83,13 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // ── Logo circle ──
-                Container(
-                  width: 110,
-                  height: 110,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppConstants.primaryColor.withValues(alpha: 0.2),
-                        blurRadius: 40,
-                        spreadRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.check_rounded,
-                      size: 52,
-                      color: AppConstants.primaryColor,
-                    ),
+                GlassContainer(
+                  borderRadius: 55,
+                  padding: const EdgeInsets.all(28),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 52,
+                    color: AppConstants.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 28),

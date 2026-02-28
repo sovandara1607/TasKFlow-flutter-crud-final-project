@@ -42,6 +42,9 @@ class AppConstants {
   static const double cardRadius = 20.0;
   static const double defaultRadius = 16.0;
 
+  /// Extra bottom padding so content is not hidden by the floating nav bar.
+  static const double bottomNavBarSpace = 110.0;
+
   // ── Status colours ──
   static Color statusColor(String status) {
     switch (status) {
@@ -129,6 +132,51 @@ class AppConstants {
         return 'Personal';
       default:
         return 'General';
+    }
+  }
+
+  // ── Glass-translucent versions of background colors ──
+  static Color glassScaffoldLight = const Color(
+    0xFFF5F5F5,
+  ); // keep solid for scaffold so glass shows
+  static Color glassScaffoldDark = const Color(0xFF1A1A1A);
+  static Color glassInputLight = const Color(0xCCFFFFFF); // ~80% white
+  static Color glassInputDark = const Color(0x1AFFFFFF); // ~10% white
+  static Color glassCardLight = const Color(0xD9FFFFFF); // ~85% white
+  static Color glassCardDark = const Color(0x1AFFFFFF); // ~10% white
+  static Color glassDialogLight = const Color(0xE6F5F5F5); // ~90% translucent
+  static Color glassDialogDark = const Color(
+    0xE6262626,
+  ); // ~90% dark translucent
+  static Color glassSheetLight = const Color(0xF0F5F5F5); // ~94% translucent
+  static Color glassSheetDark = const Color(
+    0xF0222222,
+  ); // ~94% dark translucent
+
+  // ── Glass-translucent badge/chip helpers ──
+  static Color statusBgColorGlass(String status) {
+    switch (status) {
+      case 'in_progress':
+        return accentPeach.withValues(alpha: 0.55);
+      case 'completed':
+        return accentMint.withValues(alpha: 0.55);
+      default:
+        return accentLavender.withValues(alpha: 0.45);
+    }
+  }
+
+  static Color categoryColorGlass(String category) {
+    switch (category) {
+      case 'school':
+        return accentSky.withValues(alpha: 0.55);
+      case 'work':
+        return accentPeach.withValues(alpha: 0.55);
+      case 'home':
+        return accentMint.withValues(alpha: 0.55);
+      case 'personal':
+        return accentPink.withValues(alpha: 0.55);
+      default:
+        return accentLavender.withValues(alpha: 0.45);
     }
   }
 
