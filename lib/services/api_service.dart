@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/task.dart';
+import '../models/app_notification.dart';
 
 /// Service class that handles all REST API communication with the Laravel backend.
 ///
@@ -111,6 +112,99 @@ class ApiService {
       return true;
     } else {
       throw Exception('Failed to delete task (${response.statusCode})');
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // NOTIFICATIONS
+  // ════════════════════════════════════════════════════════════════════════
+
+  /// Fetch all notifications (GET /api/notifications)
+  Future<List<AppNotification>> fetchNotifications() async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/notifications'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> body = json.decode(response.body);
+      final List<dynamic> data = body['data'] ?? [];
+      return data.map((item) => AppNotification.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load notifications (${response.statusCode})');
+    }
+  }
+
+  /// Fetch unread notification count (GET /api/notifications/unread-count)
+  Future<int> fetchUnreadCount() async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/notifications/unread-count'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> body = json.decode(response.body);
+      return body['unread_count'] as int? ?? 0;
+    } else {
+      throw Exception('Failed to load unread count (${response.statusCode})');
+    }
+  }
+
+  /// Mark a single notification as read (PUT /api/notifications/:id/read)
+  Future<bool> markNotificationAsRead(int id) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/notifications/$id/read'),
+      headers: _jsonHeaders,
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Failed to mark as read (${response.statusCode})');
+    }
+  }
+
+  /// Mark all notifications as read (PUT /api/notifications/read-all)
+  Future<bool> markAllNotificationsAsRead() async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/notifications/read-all'),
+      headers: _jsonHeaders,
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Failed to mark all as read (${response.statusCode})');
+    }
+  }
+
+  /// Delete a single notification (DELETE /api/notifications/:id)
+  Future<bool> deleteNotification(int id) async {
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/notifications/$id'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Failed to delete notification (${response.statusCode})');
+    }
+  }
+
+  /// Delete all notifications (DELETE /api/notifications)
+  Future<bool> deleteAllNotifications() async {
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/notifications'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception(
+        'Failed to delete notifications (${response.statusCode})',
+      );
     }
   }
 }

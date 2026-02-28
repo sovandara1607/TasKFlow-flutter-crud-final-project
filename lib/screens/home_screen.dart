@@ -351,7 +351,7 @@ class _StatBubble extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 28,
-                color: isDark ? Colors.white70 : AppConstants.textPrimary,
+                color: isDark ? Colors.white : color,
               ),
             ),
           ),
@@ -368,7 +368,7 @@ class _StatBubble extends StatelessWidget {
             label,
             style: GoogleFonts.poppins(
               fontSize: 11,
-              color: isDark ? Colors.white54 : AppConstants.textSecondary,
+              color: isDark ? Colors.white70 : AppConstants.textSecondary,
             ),
           ),
         ],

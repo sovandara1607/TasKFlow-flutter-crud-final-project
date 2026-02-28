@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/app_settings_provider.dart';
+import '../services/notification_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/constants.dart';
 import 'home_screen.dart';
@@ -42,6 +43,7 @@ class _MainShellState extends State<MainShell> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final lang = context.watch<AppSettingsProvider>().locale;
     final bottomPad = MediaQuery.of(context).padding.bottom;
+    final unreadCount = context.watch<NotificationProvider>().unreadCount;
 
     final labels = [
       AppLocalizations.tr('', lang),
@@ -68,6 +70,7 @@ class _MainShellState extends State<MainShell> {
                     label: labels[i],
                     isSelected: _currentIndex == i,
                     isDark: isDark,
+                    badgeCount: i == 3 ? unreadCount : 0,
                     onTap: () => setState(() => _currentIndex = i),
                   );
                 }),
@@ -161,6 +164,7 @@ class _GlassNavItem extends StatelessWidget {
   final String label;
   final bool isSelected;
   final bool isDark;
+  final int badgeCount;
   final VoidCallback onTap;
 
   const _GlassNavItem({
@@ -168,6 +172,7 @@ class _GlassNavItem extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.isDark,
+    this.badgeCount = 0,
     required this.onTap,
   });
 
@@ -205,12 +210,43 @@ class _GlassNavItem extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  icon,
-                  size: 21,
-                  color: isSelected
-                      ? (isDark ? Colors.white : AppConstants.textPrimary)
-                      : (isDark ? Colors.white30 : const Color(0xFFBDBDBD)),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 21,
+                      color: isSelected
+                          ? (isDark ? Colors.white : AppConstants.textPrimary)
+                          : (isDark ? Colors.white30 : const Color(0xFFBDBDBD)),
+                    ),
+                    if (badgeCount > 0)
+                      Positioned(
+                        right: -6,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 1,
+                          ),
+                          constraints: const BoxConstraints(minWidth: 16),
+                          decoration: BoxDecoration(
+                            color: AppConstants.errorColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            badgeCount > 99 ? '99+' : '$badgeCount',
+                            style: GoogleFonts.poppins(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              height: 1.2,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 // Label visible only when selected
                 Flexible(

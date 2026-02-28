@@ -4,11 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class TaskController extends Controller
 {
+   protected NotificationService $notificationService;
+
+   public function __construct(NotificationService $notificationService)
+   {
+      $this->notificationService = $notificationService;
+   }
+
    /**
     * GET /api/tasks
     * Retrieve the authenticated user's tasks.
@@ -47,6 +55,13 @@ class TaskController extends Controller
          'due_date'    => $validated['due_date'] ?? null,
          'category'    => $validated['category'] ?? 'general',
       ]);
+
+      // Dispatch notification for task creation
+      $this->notificationService->taskCreated(
+         $request->user()->id,
+         $task->id,
+         $task->title
+      );
 
       return response()->json([
          'success' => true,
@@ -90,6 +105,8 @@ class TaskController extends Controller
          ], 404);
       }
 
+      $oldStatus = $task->status;
+
       $validated = $request->validate([
          'title'       => 'required|string|max:255',
          'description' => 'nullable|string',
@@ -105,6 +122,16 @@ class TaskController extends Controller
          'due_date'    => $validated['due_date'] ?? $task->due_date,
          'category'    => $validated['category'] ?? $task->category,
       ]);
+
+      // Dispatch notification when task is marked completed
+      $newStatus = $validated['status'] ?? $task->status;
+      if ($newStatus === 'completed' && $oldStatus !== 'completed') {
+         $this->notificationService->taskCompleted(
+            $request->user()->id,
+            $task->id,
+            $task->title
+         );
+      }
 
       return response()->json([
          'success' => true,

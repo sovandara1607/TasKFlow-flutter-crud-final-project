@@ -103,6 +103,12 @@ class AppLocalizations {
       'university': 'University',
       'course': 'Course',
       'semester': 'Semester',
+      'mark_all_read': 'Mark All Read',
+      'clear_all': 'Clear All',
+      'clear_all_notifications': 'Clear All Notifications',
+      'clear_all_confirm': 'Are you sure you want to delete all notifications? This cannot be undone.',
+      'notifications_empty_hint': 'You\'ll see activity here when things happen.',
+      'noti': 'Noti',
     },
     'km': {
       'app_name': 'TaskFlow',
@@ -206,6 +212,12 @@ class AppLocalizations {
       'university': 'សកលវិទ្យាល័យ',
       'course': 'មុខវិជ្ជា',
       'semester': 'ឆមាស',
+      'mark_all_read': 'សម្គាល់ទាំអស់ថាបានអាន',
+      'clear_all': 'សម្អាតទាំងអស់',
+      'clear_all_notifications': 'សម្អាតការជូនដំណឹងទាំងអស់',
+      'clear_all_confirm': 'តើអ្នកប្រាកដថាចង់លុបការជូនដំណឹងទាំងអស់មែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។',
+      'notifications_empty_hint': 'អ្នកនឹងឃើញសកម្មភាពនៅទីនេះនៅពេលមានអ្វីកើតឡើង។',
+      'noti': 'ដំណឹង',
     },
   };
 

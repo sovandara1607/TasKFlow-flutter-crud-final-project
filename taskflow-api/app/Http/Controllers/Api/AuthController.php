@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +13,13 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    protected NotificationService $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * POST /api/register
      */
@@ -60,6 +68,13 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Dispatch login success notification
+        $this->notificationService->loginSuccess(
+            $user->id,
+            $request->ip(),
+            $request->userAgent()
+        );
 
         return response()->json([
             'success' => true,
@@ -165,6 +180,13 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('github_token')->plainTextToken;
+
+        // Dispatch login success notification
+        $this->notificationService->loginSuccess(
+            $user->id,
+            $request->ip(),
+            $request->userAgent()
+        );
 
         return response()->json([
             'success' => true,

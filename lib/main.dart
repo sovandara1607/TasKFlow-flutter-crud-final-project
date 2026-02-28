@@ -7,6 +7,7 @@ import 'services/task_provider.dart';
 import 'services/app_settings_provider.dart';
 import 'services/auth_provider.dart';
 import 'services/notification_service.dart';
+import 'services/notification_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -31,6 +32,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider.value(value: settings),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const MyApp(),
     ),
