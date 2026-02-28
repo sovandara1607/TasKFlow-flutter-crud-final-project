@@ -198,14 +198,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppConstants.textPrimary,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppConstants.textPrimary,
                             ),
                           ),
                           const SizedBox(width: 2),
                           Icon(
                             Icons.arrow_drop_down_rounded,
                             size: 16,
-                            color: AppConstants.textPrimary,
+                            color: isDark
+                                ? Colors.white70
+                                : AppConstants.textPrimary,
                           ),
                         ],
                       ),
@@ -226,7 +230,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppConstants.textPrimary,
+                        color: isDark ? Colors.white : AppConstants.textPrimary,
                       ),
                     ),
                   ),
@@ -235,14 +239,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     Icon(
                       Icons.schedule_rounded,
                       size: 14,
-                      color: AppConstants.textSecondary,
+                      color: isDark
+                          ? Colors.white60
+                          : AppConstants.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       _shortDate(task.dueDate),
                       style: GoogleFonts.poppins(
                         fontSize: 13,
-                        color: AppConstants.textSecondary,
+                        color: isDark
+                            ? Colors.white70
+                            : AppConstants.textSecondary,
                       ),
                     ),
                   ],
@@ -399,12 +407,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 decoration: InputDecoration(
                   hintText: AppLocalizations.tr('search_tasks', lang),
                   hintStyle: GoogleFonts.poppins(
-                    color: isDark ? Colors.white38 : AppConstants.textLight,
+                    color: isDark ? Colors.white54 : AppConstants.textLight,
                     fontSize: 14,
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
-                    color: isDark ? Colors.white54 : AppConstants.textSecondary,
+                    color: isDark ? Colors.white70 : AppConstants.textSecondary,
                   ),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -692,14 +700,14 @@ class _FilterChip extends StatelessWidget {
           color: selected
               ? AppConstants.primaryColor
               : (isDark
-                    ? Colors.white.withValues(alpha: 0.08)
+                    ? Colors.white.withValues(alpha: 0.14)
                     : Colors.white.withValues(alpha: 0.75)),
           borderRadius: BorderRadius.circular(12),
           border: selected
               ? null
               : Border.all(
                   color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
+                      ? Colors.white.withValues(alpha: 0.18)
                       : Colors.white.withValues(alpha: 0.6),
                   width: 0.5,
                 ),
@@ -727,7 +735,7 @@ class _FilterChip extends StatelessWidget {
               size: 16,
               color: selected
                   ? Colors.white
-                  : (isDark ? Colors.white54 : AppConstants.textSecondary),
+                  : (isDark ? Colors.white70 : AppConstants.textSecondary),
             ),
             const SizedBox(width: 6),
             Text(
@@ -737,7 +745,7 @@ class _FilterChip extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 color: selected
                     ? Colors.white
-                    : (isDark ? Colors.white70 : AppConstants.textPrimary),
+                    : (isDark ? Colors.white : AppConstants.textPrimary),
               ),
             ),
           ],

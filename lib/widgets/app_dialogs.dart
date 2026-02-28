@@ -317,7 +317,7 @@ class AppDialogs {
       context: context,
       isScrollControlled: true,
       backgroundColor: isDark
-          ? Colors.black.withValues(alpha: 0.60)
+          ? const Color(0xFF2A2A2A)
           : Colors.white.withValues(alpha: 0.85),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

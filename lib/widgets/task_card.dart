@@ -140,7 +140,7 @@ class TaskCard extends StatelessWidget {
                       height: 32,
                       decoration: BoxDecoration(
                         color: isDark
-                            ? Colors.white.withValues(alpha: 0.10)
+                            ? Colors.white.withValues(alpha: 0.16)
                             : Colors.white.withValues(alpha: 0.65),
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -148,7 +148,7 @@ class TaskCard extends StatelessWidget {
                         AppConstants.categoryIcon(task.category),
                         size: 17,
                         color: isDark
-                            ? Colors.white70
+                            ? Colors.white
                             : AppConstants.textSecondary,
                       ),
                     ),
@@ -161,7 +161,7 @@ class TaskCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? Colors.black.withValues(alpha: 0.20)
+                              ? Colors.white.withValues(alpha: 0.12)
                               : Colors.white.withValues(alpha: 0.60),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -173,7 +173,7 @@ class TaskCard extends StatelessWidget {
                             color: task.isOverdue
                                 ? AppConstants.errorColor
                                 : (isDark
-                                      ? Colors.white60
+                                      ? Colors.white
                                       : AppConstants.textSecondary),
                           ),
                         ),
@@ -191,7 +191,7 @@ class TaskCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     height: 1.25,
                     color: isCompleted
-                        ? (isDark ? Colors.white54 : AppConstants.textSecondary)
+                        ? (isDark ? Colors.white60 : AppConstants.textSecondary)
                         : (isDark ? Colors.white : AppConstants.textPrimary),
                     decoration: isCompleted ? TextDecoration.lineThrough : null,
                     decorationColor: isDark
@@ -215,7 +215,7 @@ class TaskCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppConstants.categoryColor(
                           task.category,
-                        ).withValues(alpha: isDark ? 0.15 : 0.12),
+                        ).withValues(alpha: isDark ? 0.25 : 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -224,7 +224,7 @@ class TaskCard extends StatelessWidget {
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: isDark
-                              ? Colors.white70
+                              ? Colors.white
                               : AppConstants.textSecondary,
                         ),
                       ),
@@ -241,7 +241,7 @@ class TaskCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? Colors.black.withValues(alpha: 0.25)
+                              ? Colors.white.withValues(alpha: 0.12)
                               : Colors.white.withValues(alpha: 0.75),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
@@ -276,7 +276,7 @@ class TaskCard extends StatelessWidget {
                                 Icons.keyboard_arrow_down_rounded,
                                 size: 14,
                                 color: isDark
-                                    ? Colors.white54
+                                    ? Colors.white70
                                     : AppConstants.textSecondary,
                               ),
                             ],

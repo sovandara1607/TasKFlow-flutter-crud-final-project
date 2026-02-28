@@ -55,8 +55,8 @@ class GlassContainer extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
+                        Colors.white.withValues(alpha: 0.18),
                         Colors.white.withValues(alpha: 0.10),
-                        Colors.white.withValues(alpha: 0.05),
                       ]
                     : [
                         Colors.white.withValues(alpha: 0.82),
@@ -68,7 +68,7 @@ class GlassContainer extends StatelessWidget {
                 color:
                     borderColor ??
                     (isDark
-                        ? Colors.white.withValues(alpha: 0.10)
+                        ? Colors.white.withValues(alpha: 0.20)
                         : Colors.white.withValues(alpha: 0.65)),
                 width: 1,
               ),
